@@ -1,106 +1,72 @@
 <?php
-// Platform admin authentication check
+// platform/router.php
+require_once __DIR__ . '/../config/config.php';
+
+// Get current page from URL parameter
 $page = $_GET['page'] ?? 'dashboard';
-$action = $_GET['action'] ?? '';
 
-// Login page için authentication bypass
-if (($page === 'admin' && $action === 'login') || $page === 'login') {
-    require_once 'platform/auth/login.php';
+// Remove any path traversal attempts
+$page = basename($page);
+
+// Auth sayfalarını kontrol et (login işlemleri için auth kontrolü yapma)
+$auth_pages = ['login', 'login-process', 'logout'];
+$is_auth_page = in_array($page, $auth_pages);
+
+// Eğer auth sayfası değilse admin authentication kontrolü yap
+if (!$is_auth_page) {
+    if (!isset($_SESSION['platform_admin_id'])) {
+        header('Location: /platform/auth/login');
+        exit;
+    }
+}
+
+// Auth sayfaları için özel routing
+if ($page === 'login' || $page === 'auth') {
+    include __DIR__ . '/auth/login.php';
     exit;
 }
 
-// Diğer sayfalar için authentication check
-if (!isset($_SESSION['platform_admin_id'])) {
-    header('Location: ?page=admin&action=login');
+if ($page === 'login-process') {
+    include __DIR__ . '/auth/login-process.php';
     exit;
 }
 
-switch ($page) {
-    case 'admin':
-        switch ($action) {
-            case 'login':
-                require_once 'platform/auth/login.php';
-                break;
-            case 'companies':
-                require_once 'platform/pages/companies.php';
-                break;
-            case 'companies-add':
-                require_once 'platform/pages/companies-add.php';
-                break;
-            case 'companies-edit':
-                require_once 'platform/pages/companies-edit.php';
-                break;
-            case 'modules':
-                require_once 'platform/pages/modules.php';
-                break;
-            case 'module-builder':
-                require_once 'platform/pages/module-builder.php';
-                break;
-            case 'marketplace':
-                require_once 'platform/pages/marketplace.php';
-                break;
-            case 'analytics':
-                require_once 'platform/pages/analytics.php';
-                break;
-            case 'settings':
-                require_once 'platform/pages/settings.php';
-                break;
-            case 'logout':
-                require_once 'platform/auth/logout.php';
-                break;
-            default:
-                // Default to dashboard
-                require_once 'platform/pages/dashboard.php';
-        }
-        break;
-        
-    case 'dashboard':
-        require_once 'platform/pages/dashboard.php';
-        break;
-        
-    case 'companies':
-        require_once 'platform/pages/companies.php';
-        break;
-        
-    case 'companies-add':
-        require_once 'platform/pages/companies-add.php';
-        break;
-        
-    case 'companies-edit':
-        require_once 'platform/pages/companies-edit.php';
-        break;
-        
-    case 'modules':
-        require_once 'platform/pages/modules.php';
-        break;
-        
-    case 'module-builder':
-        require_once 'platform/pages/module-builder.php';
-        break;
-        
-    case 'marketplace':
-        require_once 'platform/pages/marketplace.php';
-        break;
-        
-    case 'analytics':
-        require_once 'platform/pages/analytics.php';
-        break;
-        
-    case 'settings':
-        require_once 'platform/pages/settings.php';
-        break;
-        
-    case 'logout':
-        require_once 'platform/auth/logout.php';
-        break;
-        
-    default:
-        http_response_code(404);
-        if (file_exists('platform/pages/404.php')) {
-            require_once 'platform/pages/404.php';
-        } else {
-            echo "Page not found";
-        }
+if ($page === 'logout') {
+    include __DIR__ . '/auth/logout.php';
+    exit;
 }
 
+// Define valid pages
+$validPages = [
+    'dashboard',
+    'companies', 
+    'modules',
+    'module-builder',
+    'analytics',
+    'reports',
+    'revenue',
+    'templates',
+    'api',
+    'settings',
+    'logs',
+    'backup',
+    'notifications',
+    'profile'
+];
+
+// Check if page is valid
+if (!in_array($page, $validPages)) {
+    $page = 'dashboard';
+}
+
+// Route to appropriate page
+$pagePath = __DIR__ . "/pages/{$page}.php";
+
+if (file_exists($pagePath)) {
+    include $pagePath;
+} else {
+    // Show 404 or redirect to dashboard
+    header('Location: /platform/dashboard');
+    exit;
+}
 ?>
