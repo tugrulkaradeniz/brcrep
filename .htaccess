@@ -1,0 +1,28 @@
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+RewriteEngine On
+RewriteBase /brcproject/
+
+# Platform admin routing
+RewriteCond %{REQUEST_URI} ^/brcproject/admin [OR]
+RewriteCond %{QUERY_STRING} page=admin
+RewriteRule ^admin/?(.*)$ index.php?page=admin&request=$1 [QSA,L]
+
+# Demo company routing
+RewriteCond %{REQUEST_URI} ^/brcproject/(demo|test|company1)/?
+RewriteRule ^(demo|test|company1)/?(.*)$ index.php?subdomain=$1&request=$2 [QSA,L]
+
+# Install routing
+RewriteCond %{REQUEST_URI} ^/brcproject/install
+RewriteRule ^install/?(.*)$ install.php [QSA,L]
+
+# Static files - skip rewrite
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Default routing
+RewriteRule ^(.*)$ index.php?request=$1 [QSA,L]
