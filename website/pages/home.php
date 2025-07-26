@@ -444,6 +444,65 @@
                 navbar.style.background = 'rgba(255,255,255,0.95)';
             }
         });
+
+        function safeQuerySelector(elementId) {
+            // ID boş kontrolü
+            if (!elementId || elementId.trim() === '') {
+                console.warn('querySelector: Empty ID provided');
+                return null;
+            }
+            
+            // # karakteri zaten varsa tekrar ekleme
+            const selector = elementId.startsWith('#') ? elementId : '#' + elementId;
+            
+            try {
+                return document.querySelector(selector);
+            } catch (error) {
+                console.error('querySelector error:', error);
+                return null;
+            }
+        }
+
+        // Link click handler'ları için:
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Admin panel linki
+            const adminLink = document.querySelector('a[href*="admin"]');
+            if (adminLink) {
+                adminLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Direkt admin paneline yönlendir
+                    window.location.href = '/brcproject/admin';
+                });
+            }
+            
+            // BRC Load Platform linki
+            const platformLink = document.querySelector('a[href*="platform"]');
+            if (platformLink) {
+                platformLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Platform paneline yönlendir
+                    window.location.href = '/brcproject/platform';
+                });
+            }
+            
+            // Genel navigation linkleri
+            const navLinks = document.querySelectorAll('.nav-link, .menu-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    
+                    // Eğer href boşsa veya # ile başlıyorsa
+                    if (!href || href === '#' || href.startsWith('#')) {
+                        e.preventDefault();
+                        console.warn('Invalid link href:', href);
+                        return false;
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>

@@ -1,125 +1,74 @@
 <?php
-// index.php (Ana dosya - XAMPP Uyumlu)
-session_start();
+// index.php - Ana routing sistemi
+
+// Veritabanı bağlantısını en başta kur
+require_once __DIR__ . '/dbConnect/dbkonfigur.php';
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/autoload.php';
+require_once __DIR__ . '/config/functions.php';
 
-// URL'yi parse et
-$request_uri = $_SERVER['REQUEST_URI'];
-$script_name = $_SERVER['SCRIPT_NAME'];
-
-// XAMPP için proje klasör yolunu tespit et
-$project_folder = '';
-if (strpos($script_name, '/') !== false) {
-    $path_parts = explode('/', $script_name);
-    if (count($path_parts) > 2) {
-        $project_folder = '/' . $path_parts[1];
-    }
+// Veritabanı bağlantısını kontrol et
+if (!isset($pdo) && !isset($db)) {
+    die('Veritabanı bağlantısı kurulamadı!');
 }
 
-// Request path'i al
-$path = str_replace($project_folder, '', $request_uri);
-$path = parse_url($path, PHP_URL_PATH);
-$path = trim($path, '/');
+// Request URI'yi al ve temizle
+$requestUri = $_SERVER['REQUEST_URI'];
+$basePath = '/brcproject'; // XAMPP için base path
+$requestUri = str_replace($basePath, '', $requestUri);
+$requestUri = parse_url($requestUri, PHP_URL_PATH);
 
-// Debug için (geliştirme sırasında açabilirsiniz)
-/*
-echo "<!-- DEBUG INFO -->";
-echo "<!-- Request URI: " . $request_uri . " -->";
-echo "<!-- Script Name: " . $script_name . " -->";
-echo "<!-- Project Folder: " . $project_folder . " -->";
-echo "<!-- Path: " . $path . " -->";
-*/
+// Query string parametrelerini al
+$queryString = $_SERVER['QUERY_STRING'] ?? '';
+parse_str($queryString, $queryParams);
 
-// Path'i parçala
-$segments = explode('/', $path);
-$section = $segments[0] ?? '';
+// Debug için
+error_log("Request URI: " . $requestUri);
+error_log("Query params: " . print_r($queryParams, true));
 
-// Eğer path boşsa veya sadece index.php ise
-if (empty($path) || $path == 'index.php') {
-    // Admin paneline mi yoksa website'e mi gitmek istediğini kontrol et
-    if (isset($_GET['page']) && $_GET['page'] == 'admin') {
-        $section = 'platform';
-        $_GET['page'] = 'dashboard';
-    } else {
-        // Varsayılan olarak website ana sayfasına git
-        header('Location: ' . $project_folder . '/website/home');
-        exit;
-    }
+// PLATFORM ADMIN ROUTING - /admin veya /platform ile başlayanlar
+if (strpos($requestUri, '/admin') === 0 || strpos($requestUri, '/platform') === 0) {
+    // Platform admin paneline yönlendir
+    require_once __DIR__ . '/platform/router.php';
+    exit;
 }
 
-switch ($section) {
-    case 'platform':
-        // Platform admin panel
-        if (!isset($_SESSION['platform_admin_id'])) {
-            // Auth sayfaları kontrolü
-            $page = $_GET['page'] ?? $segments[1] ?? '';
-            if (!in_array($page, ['login', 'login-process', 'logout', 'auth'])) {
-                header('Location: ' . $project_folder . '/platform/auth/login');
-                exit;
-            }
-        }
-        
-        // Page parametresini ayarla
-        if (!isset($_GET['page'])) {
-            $_GET['page'] = $segments[1] ?? 'dashboard';
-        }
-        
-        include __DIR__ . '/platform/router.php';
-        break;
-        
-    case 'customer':
-        // Customer panel routing
-        require_once __DIR__ . '/services/TenantContext.php';
-        require_once __DIR__ . '/services/CompanyContext.php';
-        
-        // Tenant detection (demo, test gibi)
-        $tenant = $segments[1] ?? 'demo'; // Varsayılan tenant
-        
-        // Company context set et
-        $companyContext = CompanyContext::getInstance();
-        try {
-            $company = $companyContext->setCompanyBySubdomain($tenant);
-            if (!$company) {
-                die('Company not found for tenant: ' . htmlspecialchars($tenant));
-            }
-        } catch (Exception $e) {
-            die('Tenant error: ' . htmlspecialchars($e->getMessage()));
-        }
-        
-        // Customer authentication kontrolü
-        if (!isset($_SESSION['company_user_id'])) {
-            $page = $_GET['page'] ?? $segments[2] ?? '';
-            if (!in_array($page, ['login', 'login-process', 'logout', 'auth'])) {
-                header('Location: ' . $project_folder . '/customer/' . $tenant . '/auth/login');
-                exit;
-            }
-        }
-        
-        // Page parametresini ayarla
-        if (!isset($_GET['page'])) {
-            $_GET['page'] = $segments[2] ?? 'dashboard';
-        }
-        
-        include __DIR__ . '/customer/router.php';
-        break;
-        
-    case 'website':
-        // Ana website
-        if (!isset($_GET['page'])) {
-            $_GET['page'] = $segments[1] ?? 'home';
-        }
-        include __DIR__ . '/website/router.php';
-        break;
-        
-    case 'api':
-        // API endpoints
-        include __DIR__ . '/api/router.php';
-        break;
-        
-    default:
-        // Bilinmeyen section - website ana sayfasına yönlendir
-        header('Location: ' . $project_folder . '/website/home');
-        exit;
+// Query parameter ile admin kontrolü (?page=admin)
+if (isset($queryParams['page']) && $queryParams['page'] === 'admin') {
+    // Admin paneline yönlendir - redirect ile
+    $redirectUrl = $basePath . '/admin';
+    header('Location: ' . $redirectUrl);
+    exit;
 }
+
+// CUSTOMER PANELS - Company-specific routing
+$tenantContext = new TenantContext();
+$tenant = $tenantContext->detect();
+
+if ($tenant) {
+    // Company context'i set et
+    $companyContext = new CompanyContext();
+    $companyContext->set($tenant);
+    
+    // Customer routing'e gönder
+    require_once __DIR__ . '/customer/router.php';
+    exit;
+}
+
+// DEFAULT - Main website routing
+if (empty($requestUri) || $requestUri === '/') {
+    // Ana sayfaya yönlendir
+    header('Location: ' . $basePath . '/website/home');
+    exit;
+}
+
+// Website routing
+if (strpos($requestUri, '/website') === 0) {
+    require_once __DIR__ . '/website/router.php';
+    exit;
+}
+
+// Eğer hiçbiri match etmezse ana sayfaya yönlendir
+header('Location: ' . $basePath . '/website/home');
+exit;
 ?>

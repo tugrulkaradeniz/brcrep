@@ -1,80 +1,177 @@
 <?php
+// services/CompanyContext.php
 
-class CompanyContext
-{
-    private static $companyId = null;
-    private static $companyData = null;
+class CompanyContext {
+    private static $instance = null;
+    private $companyData = null;
+    private $db = null;
     
-    public static function set($companyId)
-    {
-        self::$companyId = $companyId;
-        self::loadCompanyData();
+    public function __construct() {
+        $this->initDatabase();
     }
     
-    public static function get()
-    {
-        return self::$companyId;
+    /**
+     * Veritabanı bağlantısını başlat
+     */
+    private function initDatabase() {
+        global $pdo, $db;
+        
+        // Global değişkenlerden veritabanı bağlantısını al
+        if (isset($pdo)) {
+            $this->db = $pdo;
+        } elseif (isset($db)) {
+            $this->db = $db;
+        } else {
+            // Eğer global değişken yoksa, doğrudan bağlantı kur
+            try {
+                require_once __DIR__ . '/../dbConnect/dbkonfigur.php';
+                if (isset($pdo)) {
+                    $this->db = $pdo;
+                } elseif (isset($db)) {
+                    $this->db = $db;
+                }
+            } catch (Exception $e) {
+                error_log("CompanyContext DB connection failed: " . $e->getMessage());
+                $this->db = null;
+            }
+        }
+        
+        // Hala bağlantı yoksa hata logla
+        if (!$this->db) {
+            error_log("CompanyContext: Database connection is null");
+        }
     }
     
-    public static function getCompanyData()
-    {
-        return self::$companyData;
+    /**
+     * Company context'i set et
+     */
+    public function set($tenant) {
+        try {
+            if (!$tenant) {
+                throw new Exception("Tenant object is null");
+            }
+            
+            // Tenant tipini kontrol et
+            if (is_object($tenant) && method_exists($tenant, 'getCompanyCode')) {
+                $companyCode = $tenant->getCompanyCode();
+            } elseif (is_string($tenant)) {
+                $companyCode = $tenant;
+            } else {
+                throw new Exception("Invalid tenant type");
+            }
+            
+            $this->loadCompanyData($companyCode);
+            
+        } catch (Exception $e) {
+            error_log("CompanyContext::set() error: " . $e->getMessage());
+            // Hata durumunda default company kullan veya hata sayfasına yönlendir
+            $this->setDefaultCompany();
+        }
     }
     
-    private static function loadCompanyData()
-    {
-        if (!self::$companyId) return;
+    /**
+     * Company verilerini yükle
+     */
+    private function loadCompanyData($companyCode) {
+        // Veritabanı bağlantısını kontrol et
+        if (!$this->db) {
+            throw new Exception("Database connection not available");
+        }
         
-        global $baglanti;
-        $stmt = $baglanti->prepare("
-            SELECT c.*, 
-                   COUNT(cu.id) as user_count,
-                   COUNT(cms.id) as module_count
-            FROM companies c
-            LEFT JOIN company_users cu ON c.id = cu.company_id AND cu.status = 'active'
-            LEFT JOIN company_module_subscriptions cms ON c.id = cms.company_id AND cms.status = 'active'
-            WHERE c.id = ?
-            GROUP BY c.id
-        ");
-        
-        $stmt->execute([self::$companyId]);
-        self::$companyData = $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->db->prepare("
+                SELECT c.*, 
+                       COUNT(cu.id) as user_count,
+                       COUNT(cms.id) as module_count
+                FROM companies c 
+                LEFT JOIN company_users cu ON c.id = cu.company_id 
+                LEFT JOIN company_module_subscriptions cms ON c.id = cms.company_id 
+                WHERE c.company_code = ? AND c.status = 'active'
+                GROUP BY c.id
+            ");
+            
+            $stmt->execute([$companyCode]);
+            $this->companyData = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$this->companyData) {
+                throw new Exception("Company not found: " . $companyCode);
+            }
+            
+            // Session'a company bilgilerini kaydet
+            $_SESSION['company_context'] = $this->companyData;
+            
+        } catch (PDOException $e) {
+            throw new Exception("Database query failed: " . $e->getMessage());
+        }
     }
     
-    public static function checkSubscription($moduleCode)
-    {
-        if (!self::$companyId) return false;
+    /**
+     * Default company set et
+     */
+    private function setDefaultCompany() {
+        $this->companyData = [
+            'id' => 1,
+            'company_name' => 'Default Company',
+            'company_code' => 'default',
+            'status' => 'active',
+            'user_count' => 0,
+            'module_count' => 0
+        ];
         
-        global $baglanti;
-        $stmt = $baglanti->prepare("
-            SELECT cms.id FROM company_module_subscriptions cms
-            JOIN marketplace_modules mm ON cms.module_id = mm.id
-            WHERE cms.company_id = ? 
-            AND mm.module_code = ? 
-            AND cms.status = 'active'
-            AND (cms.expires_at IS NULL OR cms.expires_at > CURRENT_DATE)
-        ");
-        
-        $stmt->execute([self::$companyId, $moduleCode]);
-        return $stmt->fetch() !== false;
+        $_SESSION['company_context'] = $this->companyData;
     }
     
-    public static function getSubscribedModules()
-    {
-        if (!self::$companyId) return [];
-        
-        global $baglanti;
-        $stmt = $baglanti->prepare("
-            SELECT mm.*, cms.subscribed_at, cms.expires_at
-            FROM marketplace_modules mm
-            JOIN company_module_subscriptions cms ON mm.id = cms.module_id
-            WHERE cms.company_id = ? AND cms.status = 'active'
-            ORDER BY cms.subscribed_at DESC
-        ");
-        
-        $stmt->execute([self::$companyId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    /**
+     * Aktif company verilerini al
+     */
+    public function getCompany() {
+        return $this->companyData;
+    }
+    
+    /**
+     * Company ID'sini al
+     */
+    public function getCompanyId() {
+        return $this->companyData['id'] ?? null;
+    }
+    
+    /**
+     * Company code'unu al
+     */
+    public function getCompanyCode() {
+        return $this->companyData['company_code'] ?? null;
+    }
+    
+    /**
+     * Company adını al
+     */
+    public function getCompanyName() {
+        return $this->companyData['company_name'] ?? 'Unknown Company';
+    }
+    
+    /**
+     * Context'in set edilip edilmediğini kontrol et
+     */
+    public function isSet() {
+        return !empty($this->companyData);
+    }
+    
+    /**
+     * Context'i temizle
+     */
+    public function clear() {
+        $this->companyData = null;
+        unset($_SESSION['company_context']);
+    }
+    
+    /**
+     * Singleton instance
+     */
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 }
-
 ?>

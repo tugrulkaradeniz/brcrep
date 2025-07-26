@@ -1,23 +1,22 @@
 <?php
-// platform/auth/logout.php
+// platform/auth/logout.php - Admin Logout
+
 session_start();
 
-// Clear all session data
-$_SESSION = array();
-
-// Destroy the session cookie
-if (ini_get("session.use_cookies")) {
-    $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
+// Log kaydı (eğer log sistemi çalışıyorsa)
+if (function_exists('logMessage') && isset($_SESSION['platform_admin_username'])) {
+    logMessage("Admin logout: " . $_SESSION['platform_admin_username']);
 }
 
-// Destroy the session
+// Session verilerini temizle
+session_unset();
 session_destroy();
 
-// Redirect to login with logout message
-header('Location: ?page=login&logout=1');
+// Yeni session başlat
+session_start();
+session_regenerate_id(true);
+
+// Ana sayfaya yönlendir
+header('Location: /brcproject/website/home');
 exit;
 ?>
