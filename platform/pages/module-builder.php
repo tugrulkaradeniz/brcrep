@@ -902,7 +902,6 @@ function createTestComponents() {
     showSuccess('Test components created! Try dragging them around.');
 }
 
-
 // Render components on canvas
 function renderComponentsOnCanvas(components) {
     console.log('🎨 Rendering components on canvas:', components.length, 'components');

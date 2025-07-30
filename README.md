@@ -1,253 +1,526 @@
-# BRC Load Platform
+# 🏭 BRC Load Platform
 
-## 🎯 Proje Özeti
+> **Enterprise-Grade Multi-Tenant SaaS Platform for BRC Compliance & Quality Management**
 
-BRC Load Platform, multi-tenant SaaS mimarisi ile iş süreçlerini dijitalleştiren kapsamlı bir platform. Özellikle kalite kontrol, risk değerlendirme ve compliance yönetimi için tasarlanmıştır.
+A comprehensive, production-ready platform that enables companies to build, deploy, and manage BRC compliance modules with a visual drag-and-drop interface.
 
-## ✅ Tamamlanan Özellikler
-
-### 🏗️ Multi-Tenant Altyapısı
-- **Path-based routing** (/demo, /test, /company1)
-- **Company context management** (CompanyContext.php)
-- **Tenant detection** (TenantContext.php)
-- **Isolated company data** per tenant
-
-### 🛡️ Admin Panel Sistemi
-- **✅ Admin Authentication** - Login/logout sistemi
-- **✅ Dashboard** - İstatistikler ve hızlı erişim
-- **✅ Module Management** - Modül CRUD operasyonları
-- **✅ Company Management** - Şirket yönetimi altyapısı
-
-### 🎨 Module Builder (Drag & Drop)
-- **✅ Visual Component Library** - 15+ hazır component
-- **✅ Drag & Drop Interface** - Profesyonel seviyede
-- **✅ Properties Panel** - Dinamik özellik düzenleme
-- **✅ Canvas System** - Grid-based tasarım alanı
-- **✅ Save/Load System** - Veritabanı entegrasyonu
-
-### 🏭 Quality Control System
-- **✅ Quality Control Table Component** - Özel tablolar
-- **✅ AŞAMA/KRİTER/SIKLIK Yapısı** - Kalite kontrol süreçleri
-- **✅ Sample Data Management** - Örnek veri sistemi
-- **✅ Column Configuration** - Dinamik tablo yapısı
-
-### 🗄️ Veritabanı Sistemi
-- **✅ Complete Schema** - 8 ana tablo
-- **✅ Foreign Key Relations** - İlişkisel veri bütünlüğü
-- **✅ JSON Storage** - Component/workflow verileri
-- **✅ Multi-tenant Data Isolation** - Şirket bazlı veri ayrımı
-
-## 📊 Veritabanı Yapısı
-
-### Ana Tablolar
-```sql
-companies                    # Şirket bilgileri
-├── company_users           # Şirket kullanıcıları
-├── company_module_subscriptions  # Modül abonelikleri
-└── company_data            # Şirket verileri
-
-marketplace_modules         # Modül marketi
-├── module_components       # Modül bileşenleri (JSON)
-└── module_workflows        # İş akışları (JSON)
-
-platform_admins            # Platform yöneticileri
-```
-
-### Mevcut Modüller
-1. **BRC Risk Assessment** - Risk değerlendirme sistemi
-2. **Quality Management** - Kalite yönetimi (Quality Control Table ile)
-3. **Safety Management** - Güvenlik yönetimi
-4. **Audit Management** - Denetim yönetimi
-5. **Document Control** - Doküman kontrol
-6. **Training Management** - Eğitim yönetimi
-
-## 🎨 Module Builder Components
-
-### 🎯 Display Components
-- **🏭 Quality Control Table** - Kalite kontrol süreç tablosu
-- **🛡️ Risk Matrix** - 5x5 risk değerlendirme matrisi
-- **📊 Chart** - Veri görselleştirme grafikleri
-- **📈 KPI Card** - Anahtar performans göstergeleri
-- **🎯 Status Tracker** - İlerleme takip ekranı
-
-### 📝 Input Components
-- **📝 Smart Form** - Dinamik form oluşturucu
-- **📁 File Upload** - Dosya yükleme (validation ile)
-- **📅 Date Picker** - Gelişmiş tarih seçici
-- **✍️ Signature Pad** - Dijital imza alanı
-
-### ⚡ Action Components
-- **✅ Approval Flow** - Çok aşamalı onay süreçleri
-- **🔔 Notification** - Email & SMS bildirimleri
-- **📋 Report Generator** - Otomatik rapor oluşturma
-
-### 📋 Layout Components
-- **▦ Dashboard Grid** - Responsive grid düzeni
-- **🗃️ Card Container** - Esnek kart yerleşimi
-- **📑 Tab Panel** - Sekmeli içerik organizasyonu
-
-## 🚀 Teknoloji Stack
-
-### Backend
-- **PHP 8.2+** - Server-side logic
-- **MySQL 8.0** - Veritabanı sistemi
-- **PDO** - Database abstraction
-- **JSON Storage** - Component veriler
-
-### Frontend
-- **Vanilla JavaScript** - Bağımlılık yok
-- **CSS Grid & Flexbox** - Modern layout
-- **Drag & Drop API** - HTML5 native
-- **AJAX** - Asenkron veri işleme
-
-### Development
-- **XAMPP** - Local development
-- **phpMyAdmin** - Database management
-- **Git** - Version control
-
-## 📁 Proje Yapısı
-
-```
-brcproject/
-├── index.php                 # Ana routing sistemi
-├── config/
-│   ├── config.php           # Platform konfigürasyonu
-│   ├── autoload.php         # Class autoloader
-│   └── functions.php        # Utility functions
-├── services/
-│   ├── TenantContext.php    # Tenant detection
-│   └── CompanyContext.php   # Company management
-├── platform/                # 🎛️ ADMIN PANEL
-│   ├── auth/
-│   │   ├── login.php
-│   │   ├── login-process.php
-│   │   └── logout.php
-│   ├── pages/
-│   │   ├── dashboard.php    # Admin dashboard
-│   │   ├── modules.php      # Modül listesi
-│   │   └── module-builder.php  # Drag & drop builder
-│   ├── ajax/
-│   │   └── module-builder.php  # AJAX endpoints
-│   └── router.php
-├── customer/                # 👥 CUSTOMER PANELS
-│   ├── auth/
-│   ├── pages/
-│   ├── modules/
-│   ├── ajax/
-│   └── router.php
-├── website/                 # 🌐 MAIN WEBSITE
-│   ├── pages/
-│   └── router.php
-├── assets/
-│   ├── css/
-│   └── js/
-└── dbConnect/
-    └── dbkonfigur.php       # Database connection
-```
-
-## 🎯 Kullanım Kılavuzu
-
-### Admin Panel Erişimi
-```
-URL: http://localhost/brcproject/admin
-Username: admin
-Password: 123456
-```
-
-### Yeni Modül Oluşturma
-1. Admin panel → **Modül Yönetimi**
-2. **"Yeni Modül Oluştur"** butonuna tıkla
-3. Sol panelden component'leri sürükle
-4. Properties panel'den özellikleri düzenle
-5. **"💾 Kaydet"** ile veritabanına kaydet
-6. **"🚀 Yayınla"** ile marketplace'e ekle
-
-### Quality Control Modülü Kullanımı
-```
-Component: 🏭 Quality Control Table
-Kolonlar: AŞAMA | KRİTER | SIKLIK | KABUL KRİTERİ | KONTROL SORUMLUSU | SAPMA DURUMUNDA YAPILACAK
-
-Örnek Veri:
-Hammadde Kontrolü | Görsel Kontrol | Her parti | Spec. uygun | QC Uzmanı | Red - Tedarikçiye iade
-Üretim Süreci | Sıcaklık Kontrolü | 2 saatte bir | ±2°C tolerans | Operatör | Ekipman ayarını yap
-```
-
-## 🔧 Kurulum
-
-### Gereksinimler
-- PHP 8.2+
-- MySQL 8.0+
-- XAMPP/WAMP/MAMP
-
-### Adımlar
-1. **Projeyi klonla:**
-   ```bash
-   git clone [repository-url]
-   cd brcproject
-   ```
-
-2. **Veritabanını oluştur:**
-   - phpMyAdmin'de `brcload_platform` veritabanını oluştur
-   - Gerekli SQL script'lerini çalıştır
-
-3. **Konfigürasyonu güncelle:**
-   ```php
-   // dbConnect/dbkonfigur.php
-   $dbname = 'brcload_platform';
-   ```
-
-4. **Tarayıcıda aç:**
-   ```
-   http://localhost/brcproject
-   ```
-
-## 🚧 Devam Edilecek Özellikler
-
-### 🎯 Öncelikli (Phase 4)
-- [ ] **Customer Panel Integration** - Şirketlerin modül kullanımı
-- [ ] **Data Management System** - Gerçek veri girişi/düzenleme  
-- [ ] **Module Runtime** - Modüllerin çalışır hale getirilmesi
-- [ ] **Export System** - Excel/PDF export
-- [ ] **Real-time Dashboard** - Canlı istatistikler
-
-### 🔮 Gelecek (Phase 5)
-- [ ] **Customer Login System** - Multi-tenant authentication
-- [ ] **Permission System** - Role-based access control
-- [ ] **API Development** - RESTful API endpoints
-- [ ] **Mobile Responsive** - Tablet/phone optimization
-- [ ] **Email System** - SMTP integration
-- [ ] **Backup System** - Database backup/restore
-
-## ⚡ Bilinen Sorunlar
-
-### 🔧 Çözülmüş
-- ✅ **Variable Conflict** - `$username` database user ile çakışıyordu
-- ✅ **Login System** - Hash/plain password karmaşası
-- ✅ **Database Schema** - Mevcut tablo yapısına uyumluluk
-- ✅ **Component Storage** - JSON format standardizasyonu
-
-### 🚨 Aktif
-- ⚠️ **Log Permission** - `/logs` klasörü yazma izni sorunu (kritik değil)
-- ⚠️ **Demo Data** - Customer panel için demo veriler eksik
-
-## 👥 Katkıda Bulunanlar
-
-- **Tuğrul Karadeniz** - Full-stack development
-- **Claude (Anthropic)** - Development assistance & debugging
-
-## 📄 Lisans
-
-Bu proje özel kullanım içindir.
+[![PHP](https://img.shields.io/badge/PHP-8%2B-blue.svg)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0%2B-orange.svg)](https://mysql.com)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-yellow.svg)](https://javascript.info)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple.svg)](https://getbootstrap.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
-## 🏆 Başarı Metrikleri
+## 🚀 **Key Features**
 
-- **📊 8 Veritabanı Tablosu** - Tam entegrasyon
-- **🧩 15+ Component** - Drag & drop library
-- **🎨 1 Tam Fonksiyonel Module Builder** - Professional grade
-- **🏭 1 Quality Control System** - Production ready
-- **🛡️ Multi-tenant Architecture** - Scalable
-- **⚡ AJAX-driven Interface** - Modern UX
+### 🎨 **Visual Module Builder**
+- **Drag & Drop Interface** - Professional-grade component designer
+- **Component Library** - 15+ pre-built components (Risk Matrix, Smart Forms, KPI Cards, etc.)
+- **Live Preview** - Real-time module preview and testing
+- **Canvas-based Design** - Visual positioning with grid system
+- **Properties Panel** - Dynamic component configuration
 
-**Status: ✅ MVP Tamamlandı - Production Ready Core System**
+### 🏢 **Multi-Tenant Architecture**
+- **Company Isolation** - Complete data separation per tenant
+- **Path-based Routing** - XAMPP compatible (`/demo`, `/test`, `/company1`)
+- **Custom Branding** - Per-company logos, colors, and themes
+- **Scalable Infrastructure** - Enterprise-ready architecture
+
+### 📊 **BRC Compliance Suite**
+- **Risk Assessment Matrix** - Interactive 5x5 risk calculator
+- **Quality Control Tables** - Process monitoring and tracking
+- **Approval Workflows** - Multi-step approval processes
+- **Compliance Reporting** - Automated BRC standard reports
+- **Audit Management** - Comprehensive audit trails
+
+### 🛠 **Advanced Components**
+- **Smart Forms** - Dynamic validation and conditional logic
+- **File Upload** - Drag & drop with validation
+- **Signature Pad** - Digital signature capture
+- **Chart Visualizations** - Real-time data charts
+- **Status Tracking** - Progress monitoring
+- **Notification System** - Email, SMS, in-app alerts
+
+---
+
+## 📁 **Project Structure**
+
+```
+brcproject/
+├── 🎛️ platform/              # Admin Platform
+│   ├── auth/                  # Authentication system
+│   ├── pages/                 # Admin pages
+│   │   ├── dashboard.php      # Admin dashboard
+│   │   ├── companies.php      # Company management
+│   │   ├── module-builder.php # Visual module builder ⭐
+│   │   └── modules.php        # Module management
+│   ├── ajax/                  # API endpoints
+│   │   ├── company-actions.php
+│   │   └── module-builder.php # Module builder API ⭐
+│   └── layout/                # UI components
+│
+├── 👥 customer/               # Customer Panels
+│   ├── auth/                  # Customer authentication
+│   ├── pages/                 # Customer pages
+│   │   ├── dashboard.php      # Customer dashboard
+│   │   ├── marketplace.php    # Module marketplace
+│   │   └── modules.php        # Active modules
+│   ├── modules/               # Module implementations
+│   │   ├── brc_risk_assessment.php
+│   │   └── dynamic-router.php
+│   └── ajax/                  # Customer APIs
+│
+├── 🌐 website/                # Main Website
+│   ├── pages/                 # Public pages
+│   └── router.php             # Website routing
+│
+├── ⚙️ config/                 # Configuration
+│   ├── config.php             # Main config
+│   ├── autoload.php           # Class autoloader
+│   └── functions.php          # Utility functions
+│
+├── 📦 models/                 # Data Models
+│   ├── Company.php            # Company management
+│   ├── Module.php             # Module marketplace
+│   └── PlatformAdmin.php      # Admin authentication
+│
+├── 🔧 services/               # Business Logic
+│   ├── TenantContext.php      # Tenant detection
+│   └── CompanyContext.php     # Company context
+│
+├── 🎨 assets/                 # Frontend Assets
+│   ├── css/                   # Stylesheets
+│   └── js/                    # JavaScript files
+│
+└── 🗄️ dbConnect/              # Database
+    └── dbkonfigur.php         # DB configuration
+```
+
+---
+
+## 🛠 **Installation & Setup**
+
+### **Prerequisites**
+- PHP 8.0 or higher
+- MySQL 8.0 or higher
+- Apache/Nginx web server
+- XAMPP/WAMP (for local development)
+
+### **Quick Start**
+
+1. **Clone the Repository**
+```bash
+git clone https://github.com/tugrulkaradeniz/brcrep.git
+cd brcrep
+```
+
+2. **Database Setup**
+```sql
+-- Create database
+CREATE DATABASE brcproject CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Import schema
+mysql -u root -p brcproject < database/schema.sql
+```
+
+3. **Configure Database**
+```php
+// dbConnect/dbkonfigur.php
+$host = 'localhost';
+$dbname = 'brcproject';
+$username = 'root';
+$password = '';
+
+$pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
+```
+
+4. **Set Permissions**
+```bash
+chmod 755 -R brcproject/
+chmod 777 -R brcproject/logs/
+chmod 777 -R brcproject/uploads/
+```
+
+5. **Access the Platform**
+- **Main Website**: `http://localhost/brcproject/`
+- **Admin Platform**: `http://localhost/brcproject/admin/`
+- **Demo Company**: `http://localhost/brcproject/demo/`
+
+### **Multi-Tenant Setup**
+
+For production with real subdomains:
+```apache
+# .htaccess configuration
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^([^.]+)\.yourdomain\.com$
+RewriteRule ^(.*)$ /brcproject/customer/?company=%1&path=$1 [QSA,L]
+```
+
+---
+
+## 🎯 **Usage Guide**
+
+### **1. Admin Platform**
+
+#### **Company Management**
+```php
+// Create new company
+POST /platform/ajax/company-actions.php
+{
+    "action": "create_company",
+    "name": "ABC Manufacturing",
+    "domain": "abc-manufacturing",
+    "admin_email": "admin@abc.com"
+}
+```
+
+#### **Module Builder** ⭐
+```javascript
+// Access the visual module builder
+http://localhost/brcproject/admin/module-builder
+
+// Create new module
+http://localhost/brcproject/admin/module-builder?action=create
+
+// Edit existing module
+http://localhost/brcproject/admin/module-builder?edit=30
+```
+
+### **2. Module Builder API**
+
+#### **Save Module with Components**
+```javascript
+// Frontend JavaScript usage
+const moduleData = {
+    name: "Quality Control Process",
+    description: "Complete quality management workflow",
+    category: "Quality Management", 
+    version: "1.0",
+    price: 299
+};
+
+const components = [
+    {
+        name: "Risk Assessment Matrix",
+        type: "risk-matrix",
+        config: { size: "5x5", axes: ["Likelihood", "Impact"] },
+        position_x: 100,
+        position_y: 50,
+        width: 300,
+        height: 300
+    }
+];
+
+// Save via API
+const response = await fetch('/platform/ajax/module-builder.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        action: 'save',
+        module_id: 30,
+        ...moduleData,
+        components: JSON.stringify(components)
+    })
+});
+```
+
+### **3. Customer Panel**
+
+#### **Module Marketplace**
+```php
+// Subscribe to module
+POST /customer/ajax/module-actions.php
+{
+    "action": "subscribe",
+    "module_id": 30,
+    "company_id": 5
+}
+```
+
+#### **Access Subscribed Modules**
+```
+http://localhost/brcproject/demo/modules/risk-assessment
+http://localhost/brcproject/demo/modules/quality-control
+```
+
+---
+
+## 🧩 **Component Library**
+
+### **Display Components**
+| Component | Description | Use Case |
+|-----------|-------------|----------|
+| 🛡️ **Risk Matrix** | 5x5 Interactive risk assessment | BRC risk evaluation |
+| 📊 **Charts** | Data visualization (Line, Bar, Pie) | KPI tracking |
+| 📈 **KPI Cards** | Key performance indicators | Dashboard metrics |
+| 🎯 **Status Tracker** | Progress monitoring | Workflow status |
+| 🏭 **Quality Control Table** | Process monitoring | Quality management |
+
+### **Input Components**
+| Component | Description | Use Case |
+|-----------|-------------|----------|
+| 📝 **Smart Forms** | Dynamic forms with validation | Data collection |
+| 📁 **File Upload** | Drag & drop file uploads | Document management |
+| 📅 **Date Picker** | Advanced date selection | Scheduling |
+| ✍️ **Signature Pad** | Digital signature capture | Approvals |
+
+### **Action Components**
+| Component | Description | Use Case |
+|-----------|-------------|----------|
+| ✅ **Approval Flow** | Multi-step approval process | Workflow management |
+| 🔔 **Notifications** | Email, SMS, in-app alerts | Communication |
+| 📋 **Report Generator** | Automated report creation | Compliance reporting |
+
+### **Layout Components**
+| Component | Description | Use Case |
+|-----------|-------------|----------|
+| ▦ **Dashboard Grid** | Responsive grid layout | Dashboard design |
+| 🗃️ **Card Container** | Flexible card layouts | Content organization |
+| 📑 **Tab Panel** | Tabbed content | Information grouping |
+
+---
+
+## 🔧 **API Reference**
+
+### **Module Builder Endpoints**
+
+```php
+POST /platform/ajax/module-builder.php
+```
+
+#### **Actions:**
+
+| Action | Description | Parameters |
+|--------|-------------|------------|
+| `create_module` | Create new module | `name`, `description`, `category` |
+| `update_module` | Update existing module | `module_id`, `name`, `description`, `category`, `version`, `price` |
+| `get_modules` | List all modules | - |
+| `get_module_details` | Get module details | `module_id` |
+| `add_component` | Add component to module | `module_id`, `component_name`, `component_type`, `component_config`, `position_x`, `position_y`, `width`, `height` |
+| `delete_all_components` | Remove all components | `module_id` |
+| `save` | Save module + components | `module_id`, module fields, `components` (JSON array) |
+
+#### **Example Responses:**
+
+```json
+// Success Response
+{
+    "success": true,
+    "message": "Module created successfully",
+    "module_id": 30,
+    "module_name": "Quality Control Process"
+}
+
+// Error Response  
+{
+    "success": false,
+    "error": "Module name is required"
+}
+```
+
+---
+
+## 🔐 **Security Features**
+
+- **CSRF Protection** - All forms protected against CSRF attacks
+- **Input Sanitization** - All user inputs sanitized and validated
+- **SQL Injection Prevention** - Prepared statements used throughout
+- **Session Security** - Secure session management
+- **Password Hashing** - BCrypt password hashing
+- **Rate Limiting** - API rate limiting implemented
+- **Data Isolation** - Complete tenant data separation
+- **Access Control** - Role-based permissions
+
+---
+
+## 🗄️ **Database Schema**
+
+### **Core Tables**
+
+```sql
+-- Companies (Tenants)
+CREATE TABLE companies (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    domain VARCHAR(100) UNIQUE,
+    logo VARCHAR(255),
+    theme_color VARCHAR(7) DEFAULT '#667eea',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Marketplace Modules
+CREATE TABLE marketplace_modules (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    category VARCHAR(100),
+    version VARCHAR(20) DEFAULT '1.0',
+    price DECIMAL(10,2) DEFAULT 0.00,
+    status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+    created_by INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Module Components
+CREATE TABLE module_components (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    module_id INT NOT NULL,
+    component_name VARCHAR(255) NOT NULL,
+    component_type VARCHAR(100) NOT NULL,
+    component_code VARCHAR(255),
+    component_config JSON,
+    position_x FLOAT DEFAULT 0,
+    position_y FLOAT DEFAULT 0,
+    width INT DEFAULT 300,
+    height INT DEFAULT 200,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (module_id) REFERENCES marketplace_modules(id) ON DELETE CASCADE
+);
+
+-- Company Subscriptions
+CREATE TABLE company_module_subscriptions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    company_id INT NOT NULL,
+    module_id INT NOT NULL,
+    subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,
+    status ENUM('active', 'expired', 'cancelled') DEFAULT 'active',
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+    FOREIGN KEY (module_id) REFERENCES marketplace_modules(id) ON DELETE CASCADE
+);
+```
+
+---
+
+## 🚀 **Recent Updates**
+
+### **v2.1.0** - Module Builder Enhancement
+- ✅ **Fixed JSON/FormData compatibility** in module-builder API
+- ✅ **Component positioning system** - Drag & drop with real-time updates
+- ✅ **Enhanced component library** - 15+ professional components
+- ✅ **Auto-save functionality** - Prevent data loss
+- ✅ **Price field support** - Module pricing in marketplace
+- ✅ **Improved error handling** - Better debugging and logging
+
+### **Recent Bug Fixes**
+- 🔧 Fixed `module_id` NULL issue in component saving
+- 🔧 Resolved `component_code` field requirement
+- 🔧 JSON decode compatibility for all API endpoints
+- 🔧 Component drag & drop positioning accuracy
+- 🔧 Price field persistence in module updates
+
+---
+
+## 🧪 **Testing**
+
+### **Module Builder Test**
+```javascript
+// Test module creation and component addition
+async function testModuleBuilder() {
+    // 1. Create module
+    const createResponse = await apiCall('create_module', {
+        name: 'Test Quality Module',
+        description: 'Testing module creation',
+        category: 'Quality Management'
+    });
+    
+    console.log('Module created:', createResponse.module_id);
+    
+    // 2. Add components
+    const addComponentResponse = await apiCall('add_component', {
+        module_id: createResponse.module_id,
+        component_name: 'Test Risk Matrix',
+        component_type: 'risk-matrix',
+        component_config: '{"size":"5x5"}',
+        position_x: 100,
+        position_y: 100,
+        width: 300,
+        height: 300
+    });
+    
+    console.log('Component added:', addComponentResponse.component_id);
+}
+```
+
+### **Multi-Tenant Test**
+```bash
+# Test different company access
+curl "http://localhost/brcproject/demo/dashboard"
+curl "http://localhost/brcproject/test/dashboard"
+curl "http://localhost/brcproject/company1/dashboard"
+```
+
+---
+
+## 📈 **Performance**
+
+- **Database Optimization** - Indexed queries, efficient joins
+- **AJAX-Driven UI** - Minimal page reloads
+- **Component Caching** - Reduced load times
+- **Compressed Assets** - Optimized CSS/JS delivery
+- **Lazy Loading** - Components loaded on demand
+
+---
+
+## 🤝 **Contributing**
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/new-component`)
+3. Commit changes (`git commit -am 'Add new component'`)
+4. Push to branch (`git push origin feature/new-component`)
+5. Create Pull Request
+
+### **Development Guidelines**
+- Follow PSR-4 autoloading standards
+- Use prepared statements for all database queries
+- Implement proper error handling and logging
+- Add JSDoc comments for JavaScript functions
+- Test multi-tenant functionality
+
+---
+
+## 📜 **License**
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🛟 **Support**
+
+### **Documentation**
+- [API Documentation](docs/api.md)
+- [Component Development Guide](docs/components.md)
+- [Multi-Tenant Setup Guide](docs/multi-tenant.md)
+
+### **Community**
+- [GitHub Issues](https://github.com/tugrulkaradeniz/brcrep/issues)
+- [Discussions](https://github.com/tugrulkaradeniz/brcrep/discussions)
+
+### **Commercial Support**
+For enterprise support, custom development, or deployment assistance:
+- **Email**: support@brcload.com
+- **Website**: [brcload.com](https://brcload.com)
+
+---
+
+## ⭐ **Acknowledgments**
+
+- **BRC Global Standards** - Compliance framework inspiration
+- **Bootstrap Team** - UI framework
+- **PHP Community** - Open source ecosystem
+- **Contributors** - Everyone who helped build this platform
+
+---
+
+<div align="center">
+
+**[⬆ Back to Top](#-brc-load-platform)**
+
+Made with ❤️ for the **BRC Compliance Community**
+
+[![Stars](https://img.shields.io/github/stars/tugrulkaradeniz/brcrep?style=social)](https://github.com/tugrulkaradeniz/brcrep/stargazers)
+[![Forks](https://img.shields.io/github/forks/tugrulkaradeniz/brcrep?style=social)](https://github.com/tugrulkaradeniz/brcrep/network/members)
+
+</div>

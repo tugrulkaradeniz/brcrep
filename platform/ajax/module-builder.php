@@ -245,6 +245,132 @@ try {
             break;
             
         case 'save':
+            $module_id = $input['module_id'] ?? null;
+            $components = json_decode($input['components'] ?? '[]', true);
+            
+            try {
+                if (isset($input['name'])) {
+                    $sql = "UPDATE marketplace_modules SET 
+                        name = :name,
+                        description = :description,
+                        category = :category,
+                        version = :version,
+                        price = :price,
+                        updated_at = NOW()
+                        WHERE id = :module_id";
+                    
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':name' => $input['name'],
+                        ':description' => $input['description'],
+                        ':category' => $input['category'],
+                        ':version' => $input['version'],
+                        ':price' => $input['price'],
+                        ':module_id' => $module_id
+                    ]);
+                }
+                
+                // Eski komponentleri sil
+                $sql = "DELETE FROM module_components WHERE module_id = :module_id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':module_id' => $module_id]);
+                
+                // Yeni komponentleri kaydet
+                foreach ($components as $component) {
+                    $sql = "INSERT INTO module_components (
+                        module_id, component_name, component_type, component_code,
+                        component_config, position_x, position_y, 
+                        width, height, created_at
+                    ) VALUES (
+                        :module_id, :component_name, :component_type, :component_code,
+                        :component_config, :position_x, :position_y,
+                        :width, :height, NOW()
+                    )";
+                    
+                    $component_code = strtolower(str_replace([' ', '-'], '_', $component['name'])) . '_' . time();
+                    
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':module_id' => $module_id,
+                        ':component_name' => $component['name'],
+                        ':component_type' => $component['type'],
+                        ':component_code' => $component_code,
+                        ':component_config' => json_encode($component['config']),
+                        ':position_x' => $component['position_x'],
+                        ':position_y' => $component['position_y'],
+                        ':width' => $component['width'],
+                        ':height' => $component['height']
+                    ]);
+                }
+                
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Module and components saved successfully',
+                    'module_id' => $module_id,
+                    'components_count' => count($components)
+                ]);
+                
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Save failed: ' . $e->getMessage()
+                ]);
+            }
+            break;
+
+        case 'add_component':
+            try {
+                // $input kullan, $_POST değil
+                debugLog('add_component called', $input);
+                
+                $component_code = strtolower(str_replace([' ', '-'], '_', $input['component_name'])) . '_' . time();
+                
+                $sql = "INSERT INTO module_components (
+                    module_id, component_name, component_type, component_code,
+                    component_config, position_x, position_y,
+                    width, height, created_at
+                ) VALUES (
+                    :module_id, :component_name, :component_type, :component_code,
+                    :component_config, :position_x, :position_y,
+                    :width, :height, NOW()
+                )";
+                
+                $stmt = $pdo->prepare($sql);
+                $result = $stmt->execute([
+                    ':module_id' => (int)$input['module_id'],  // $input kullan!
+                    ':component_name' => $input['component_name'],
+                    ':component_type' => $input['component_type'],
+                    ':component_code' => $component_code,
+                    ':component_config' => $input['component_config'],
+                    ':position_x' => (float)$input['position_x'],
+                    ':position_y' => (float)$input['position_y'],
+                    ':width' => (int)$input['width'],
+                    ':height' => (int)$input['height']
+                ]);
+                
+                if ($result) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Component added successfully',
+                        'component_id' => $pdo->lastInsertId(),
+                        'component_code' => $component_code
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Failed to insert component'
+                    ]);
+                }
+                
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Failed to add component: ' . $e->getMessage(),
+                    'debug_input' => $input  // Debug için
+                ]);
+            }
+            break;
+
         case 'create_module':
             debugLog('Creating module with action: ' . $action, $input);
             
@@ -292,48 +418,45 @@ try {
             break;
 
         case 'update_module':
-            $module_id = $input['module_id'] ?? 0;
-            if (!$module_id) {
-                echo json_encode(['error' => 'Module ID required for update']);
-                exit();
-            }
-            
-            $name = $input['name'] ?? $input['module_name'] ?? '';
-            $description = $input['description'] ?? '';
-            $category = $input['category'] ?? 'general';
-            
-            if (empty($name)) {
-                echo json_encode(['error' => 'Module name required for update']);
-                exit();
-            }
-            
-            $columns = checkTableStructure($pdo);
-            
-            if (in_array('module_name', $columns)) {
-                $stmt = $pdo->prepare('
-                    UPDATE marketplace_modules 
-                    SET name = ?, module_name = ?, description = ?, category = ?, updated_at = NOW()
-                    WHERE id = ?
-                ');
-                $params = [$name, $name, $description, $category, $module_id];
-            } else {
-                $stmt = $pdo->prepare('
-                    UPDATE marketplace_modules 
-                    SET name = ?, description = ?, category = ?, updated_at = NOW()
-                    WHERE id = ?
-                ');
-                $params = [$name, $description, $category, $module_id];
-            }
-            
-            if ($stmt->execute($params)) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Module updated successfully',
-                    'module_id' => $module_id,
-                    'module_name' => $name
+            try {
+                // $input kullan, $_POST değil
+                $sql = "UPDATE marketplace_modules SET 
+                    name = :name,
+                    description = :description,
+                    category = :category,
+                    version = :version,
+                    price = :price,
+                    updated_at = NOW()
+                    WHERE id = :module_id";
+                
+                $stmt = $pdo->prepare($sql);
+                $result = $stmt->execute([
+                    ':name' => $input['name'],
+                    ':description' => $input['description'],
+                    ':category' => $input['category'],
+                    ':version' => $input['version'],
+                    ':price' => (float)($input['price'] ?? 0),
+                    ':module_id' => (int)$input['module_id']
                 ]);
-            } else {
-                echo json_encode(['error' => 'Failed to update module']);
+                
+                if ($result) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Module updated successfully',
+                        'module_id' => $input['module_id'],
+                        'module_name' => $input['name']
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Failed to update module'
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Update failed: ' . $e->getMessage()
+                ]);
             }
             break;
             
@@ -405,23 +528,21 @@ try {
             break;
 
         case 'delete_all_components':
-            $module_id = $input['module_id'] ?? 0;
-            
-            if (!$module_id) {
-                echo json_encode(['error' => 'Module ID required']);
-                exit();
-            }
-            
-            $stmt = $pdo->prepare('DELETE FROM module_components WHERE module_id = ?');
-            $result = $stmt->execute([$module_id]);
-            
-            if ($result) {
+            try {
+                // $input kullan, $_POST değil
+                $sql = "DELETE FROM module_components WHERE module_id = :module_id";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':module_id' => (int)$input['module_id']]);
+                
                 echo json_encode([
                     'success' => true,
                     'message' => 'All components deleted successfully'
                 ]);
-            } else {
-                echo json_encode(['error' => 'Failed to delete components']);
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Failed to delete components: ' . $e->getMessage()
+                ]);
             }
             break;
             
