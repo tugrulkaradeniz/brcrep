@@ -1,0 +1,359 @@
+{
+  "template_info": {
+    "template_name": "BRC Food Safety Quality Control v9",
+    "template_code": "brc_food_safety_v9", 
+    "brc_standard": "BRC Food Safety v9",
+    "template_version": "1.0",
+    "revision": "Rev 07",
+    "description": "Comprehensive BRC Food Safety quality control process for dried fruit processing",
+    "applicable_products": ["Kuru incir", "Kuru kayısı", "Dut", "Vişne", "Kuru meyveler"],
+    "total_estimated_duration": 480,
+    "created_by": "GIDA GÜVENLİĞİ EKİP LİDERİ"
+  },
+  "process_steps": [
+    {
+      "step_number": 1,
+      "step_name": "Hammadde Girişi Kontrolü",
+      "step_code": "incoming_materials",
+      "category": "Girdi Kontrolü",
+      "description": "Tedarikçiden seçilmiş ürün (kuru incir, kuru kayısı, dut, vişne vb.) satın alma kontrolleri",
+      "control_criteria": "Hammadde Giriş Kontrol Formundaki değerlere uygunluk",
+      "frequency": "Her parti girişinde",
+      "estimated_duration": 30,
+      "responsible_roles": ["Kalite-Lab Sorumlusu"],
+      "mandatory": true,
+      "brc_clauses": ["5.1.1", "5.2.1"],
+      "corrective_actions": [
+        "Ürün İadesi",
+        "Tedarikçinin uyarılması"
+      ],
+      "required_documents": [
+        "Hammadde Giriş Kontrol Formu",
+        "Tedarikçi Sertifikası"
+      ],
+      "measurement_parameters": [
+        {
+          "parameter": "Nem oranı",
+          "target_value": "Max %20",
+          "measurement_method": "Nem ölçer",
+          "critical": true
+        },
+        {
+          "parameter": "Yabancı madde varlığı", 
+          "target_value": "Görsel olarak yok",
+          "measurement_method": "Görsel kontrol",
+          "critical": true
+        },
+        {
+          "parameter": "Renk ve görünüm",
+          "target_value": "Spesifikasyona uygun",
+          "measurement_method": "Görsel değerlendirme",
+          "critical": false
+        },
+        {
+          "parameter": "Koku",
+          "target_value": "Karakteristik koku, yabancı koku yok",
+          "measurement_method": "Duyusal değerlendirme", 
+          "critical": false
+        }
+      ],
+      "next_steps": [2],
+      "can_skip": false
+    },
+    {
+      "step_number": 2,
+      "step_name": "Ambalaj Girişi",
+      "step_code": "packaging_control",
+      "category": "Girdi Kontrolü",
+      "description": "Ambalaj malzemesi alımında uyulması gereken kriterler kontrolü",
+      "control_criteria": "Talimat değerlere uygunluk",
+      "frequency": "Her ambalaj girişinde", 
+      "estimated_duration": 15,
+      "responsible_roles": ["Depo Sorumlusu"],
+      "mandatory": true,
+      "brc_clauses": ["5.6.1"],
+      "corrective_actions": [
+        "Ürün İadesi", 
+        "Tedarikçinin uyarılması"
+      ],
+      "required_documents": [
+        "Ambalaj Spesifikasyonu",
+        "Gıda ile Temas Uygunluk Belgesi"
+      ],
+      "measurement_parameters": [
+        {
+          "parameter": "Fiziksel bütünlük",
+          "target_value": "Yırtık, delik yok",
+          "measurement_method": "Görsel kontrol",
+          "critical": true
+        },
+        {
+          "parameter": "Temizlik durumu",
+          "target_value": "Temiz ve hijyenik",
+          "measurement_method": "Görsel kontrol",
+          "critical": true
+        },
+        {
+          "parameter": "Etiketleme",
+          "target_value": "Doğru ve eksiksiz", 
+          "measurement_method": "Doküman kontrolü",
+          "critical": false
+        }
+      ],
+      "next_steps": [3],
+      "can_skip": false
+    },
+    {
+      "step_number": 3,
+      "step_name": "Yardımcı Malzeme Kontrolü",
+      "step_code": "supporting_materials",
+      "category": "Girdi Kontrolü",
+      "description": "Tuz, Pirinç unu, doğal rafya, selefon, etiket kontrolü",
+      "control_criteria": "İlgili alım talimatına uygunluk",
+      "frequency": "Her satın almada",
+      "estimated_duration": 20,
+      "responsible_roles": ["Kalite-Lab Sorumlusu", "Depo Sorumlusu", "Etiket Sorumlusu"],
+      "mandatory": true,
+      "brc_clauses": ["5.1.1"],
+      "corrective_actions": [
+        "Ürün İadesi",
+        "Tedarikçinin uyarılması"
+      ],
+      "required_documents": [
+        "Yardımcı Malzeme Spesifikasyonu"
+      ],
+      "measurement_parameters": [
+        {
+          "parameter": "Tuz saflığı",
+          "target_value": "Gıda kalitesi",
+          "measurement_method": "Sertifika kontrolü",
+          "critical": true
+        },
+        {
+          "parameter": "Pirinç unu rengi",
+          "target_value": "Beyaz, lekesiz",
+          "measurement_method": "Görsel kontrol",
+          "critical": false
+        },
+        {
+          "parameter": "Rafya sağlamlığı",
+          "target_value": "Kopma direnci yeterli",
+          "measurement_method": "Fiziksel test",
+          "critical": false
+        }
+      ],
+      "next_steps": [4],
+      "can_skip": false
+    },
+    {
+      "step_number": 4,
+      "step_name": "Fümigasyon",
+      "step_code": "fumigation",
+      "category": "İşleme",
+      "description": "Fümigasyon işlemi kontrolleri",
+      "control_criteria": "Talimatta istenen özelliklere uygunluk",
+      "frequency": "Her fümigasyon işleminde",
+      "estimated_duration": 120,
+      "responsible_roles": ["Tedarikçi Firma Yetkilisi"],
+      "mandatory": true,
+      "brc_clauses": ["4.17.1"],
+      "corrective_actions": [
+        "Yeniden fümigasyon işlemi"
+      ],
+      "required_documents": [
+        "Fümigasyon Raporu",
+        "Fümigant Güvenlik Bilgi Formu"
+      ],
+      "measurement_parameters": [
+        {
+          "parameter": "Fümigant Miktarı",
+          "target_value": "Talimata uygun dozaj",
+          "measurement_method": "Tartım ve hesaplama",
+          "critical": true
+        },
+        {
+          "parameter": "Fümigasyon Süresi",
+          "target_value": "Minimum belirtilen süre",
+          "measurement_method": "Zaman kaydı",
+          "critical": true
+        },
+        {
+          "parameter": "Basınç",
+          "target_value": "Optimal aralık",
+          "measurement_method": "Basınç ölçer",
+          "critical": true
+        },
+        {
+          "parameter": "Sıcaklık", 
+          "target_value": "20-25°C arası",
+          "measurement_method": "Sıcaklık ölçer",
+          "critical": true
+        },
+        {
+          "parameter": "Canlı Böcek Varlığı",
+          "target_value": "Tespit edilmemeli",
+          "measurement_method": "Görsel kontrol",
+          "critical": true
+        }
+      ],
+      "next_steps": [5],
+      "can_skip": false
+    },
+    {
+      "step_number": 5,
+      "step_name": "Yıkama",
+      "step_code": "washing",
+      "category": "İşleme",
+      "description": "Tuz oranı kontrolü ile yıkama işlemi",
+      "control_criteria": "Min 6, Max 8 bome derecesi",
+      "frequency": "Her yıkama işleminde",
+      "estimated_duration": 45,
+      "responsible_roles": ["Kalite-Lab Sorumlusu"],
+      "mandatory": true,
+      "brc_clauses": ["6.1.1"],
+      "corrective_actions": [
+        "Tuz ilavesi veya seyreltilmesi (su ilavesi)"
+      ],
+      "required_documents": [
+        "Yıkama İşlemi Kayıt Formu"
+      ],
+      "measurement_parameters": [
+        {
+          "parameter": "Tuz oranı (Bome)",
+          "target_value": "6-8 bome derecesi",
+          "measurement_method": "Bome ölçer",
+          "critical": true
+        },
+        {
+          "parameter": "Su sıcaklığı",
+          "target_value": "Oda sıcaklığı",
+          "measurement_method": "Sıcaklık ölçer",
+          "critical": false
+        },
+        {
+          "parameter": "Yıkama süresi",
+          "target_value": "Prosedüre uygun",
+          "measurement_method": "Kronometre",
+          "critical": false
+        }
+      ],
+      "next_steps": [6],
+      "can_skip": false
+    },
+    {
+      "step_number": 6,
+      "step_name": "Aflatoksinli İncir Seçimi",
+      "step_code": "aflatoxin_selection",
+      "category": "Seçim",
+      "description": "UV lamba altında aflatoksin tespiti ve seçimi",
+      "control_criteria": "UV lamba altında aflatoksin tespit edilmemesi",
+      "frequency": "Her 5 telerada bir",
+      "estimated_duration": 60,
+      "responsible_roles": ["Üretim Sorumlusu", "Karanlık Oda Sorumlusu"],
+      "mandatory": true,
+      "brc_clauses": ["5.3.1"],
+      "corrective_actions": [
+        "Yeniden aflatoksin seçimi"
+      ],
+      "required_documents": [
+        "Aflatoksin Kontrol Kayıt Formu"
+      ],
+      "measurement_parameters": [
+        {
+          "parameter": "UV altında floresan",
+          "target_value": "Mavi-yeşil floresan yok",
+          "measurement_method": "UV lamba (365nm)",
+          "critical": true
+        },
+        {
+          "parameter": "Seçim oranı",
+          "target_value": "%100 kontrol",
+          "measurement_method": "Görsel sayım",
+          "critical": true
+        },
+        {
+          "parameter": "Karanlık oda koşulları",
+          "target_value": "Tam karanlık",
+          "measurement_method": "Işık ölçer",
+          "critical": false
+        }
+      ],
+      "next_steps": [7, 8],
+      "can_skip": false
+    }
+  ],
+  "workflow_connections": [
+    {"from": 1, "to": 2, "condition": "approved", "type": "sequential"},
+    {"from": 2, "to": 3, "condition": "approved", "type": "sequential"},
+    {"from": 3, "to": 4, "condition": "approved", "type": "sequential"},
+    {"from": 4, "to": 5, "condition": "approved", "type": "sequential"},
+    {"from": 5, "to": 6, "condition": "approved", "type": "sequential"},
+    {"from": 6, "to": 7, "condition": "approved", "type": "parallel"},
+    {"from": 6, "to": 8, "condition": "approved", "type": "parallel"}
+  ],
+  "timing_rules": {
+    "total_process_time": "8-12 hours per batch",
+    "critical_path_steps": [1, 4, 5, 6],
+    "parallel_steps": [[7, 8]],
+    "waiting_periods": {
+      "fumigation_aeration": 240,
+      "drying_rest": 480
+    },
+    "working_hours": {
+      "start": "07:00",
+      "end": "17:00",
+      "breaks": ["12:00-13:00"]
+    }
+  },
+  "notification_rules": {
+    "upcoming_task": 60,
+    "overdue_warning": 30, 
+    "critical_delay": 120,
+    "daily_summary": "08:00",
+    "weekly_report": "Monday 09:00"
+  },
+  "compliance_mapping": {
+    "brc_version": "Food Safety v9",
+    "last_updated": "2025-01-30",
+    "audit_frequency": "Annual",
+    "critical_control_points": [1, 4, 5, 6],
+    "documentation_requirements": [
+      "All measurement records",
+      "Non-conformity reports",
+      "Corrective action logs",
+      "Training records"
+    ]
+  },
+  "roles_and_responsibilities": {
+    "Kalite-Lab Sorumlusu": {
+      "description": "Quality and Laboratory Manager",
+      "responsibilities": ["Incoming materials inspection", "Laboratory tests", "Documentation"],
+      "required_training": ["BRC Food Safety", "Laboratory procedures", "HACCP"],
+      "backup_roles": ["Üretim Sorumlusu"]
+    },
+    "Depo Sorumlusu": {
+      "description": "Warehouse Manager", 
+      "responsibilities": ["Storage conditions", "Inventory management", "Packaging control"],
+      "required_training": ["Warehouse management", "BRC storage requirements"],
+      "backup_roles": ["Genel Koordinatör"]
+    },
+    "Üretim Sorumlusu": {
+      "description": "Production Manager",
+      "responsibilities": ["Production process", "Quality control", "Staff supervision"],
+      "required_training": ["Production processes", "Quality systems", "Personnel management"],
+      "backup_roles": ["Kalite-Lab Sorumlusu"]
+    },
+    "Tedarikçi Firma Yetkilisi": {
+      "description": "Supplier Company Representative",
+      "responsibilities": ["Fumigation process", "External service quality"],
+      "required_training": ["Fumigation procedures", "Safety protocols"],
+      "backup_roles": ["Genel Koordinatör"]
+    },
+    "Karanlık Oda Sorumlusu": {
+      "description": "Dark Room Operator",
+      "responsibilities": ["Aflatoxin detection", "UV equipment maintenance"],
+      "required_training": ["Aflatoxin detection", "UV equipment operation"],
+      "backup_roles": ["Üretim Sorumlusu"]
+    }
+  }
+}
