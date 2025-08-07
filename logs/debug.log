@@ -1,0 +1,12 @@
+2025-08-07 09:27:14 - DEBUG: REQUEST_METHOD - "GET"
+2025-08-07 09:27:14 - DEBUG: POST Data - []
+2025-08-07 09:27:14 - DEBUG: GET Data - {"action":"get_module_details","module_id":"31"}
+2025-08-07 09:27:14 - DEBUG: JSON Data - null
+2025-08-07 09:27:14 - DEBUG: Using GET input - []
+2025-08-07 09:27:14 - DEBUG: Action detected - {"action":"get_module_details"}
+2025-08-07 09:45:06 - DEBUG: REQUEST_METHOD - "GET"
+2025-08-07 09:45:06 - DEBUG: POST Data - []
+2025-08-07 09:45:06 - DEBUG: GET Data - {"action":"get_module_details","module_id":"31"}
+2025-08-07 09:45:06 - DEBUG: JSON Data - null
+2025-08-07 09:45:06 - DEBUG: Using GET input - []
+2025-08-07 09:45:06 - DEBUG: Action detected - {"action":"get_module_details"}

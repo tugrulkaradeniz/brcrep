@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRC Module Edit Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .debug-box { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .error { border-left-color: #dc3545; background: #f8d7da; }
+        .success { border-left-color: #28a745; background: #d4edda; }
+        .console-log { background: #000; color: #00ff00; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn-success { background: #28a745; }
+        .btn-danger { background: #dc3545; }
+    </style>
+</head>
+<body>
+    <h1>🔧 BRC Module Edit Debug</h1>
+    
+    <div class="debug-box">
+        <h3>1. Mevcut Modülleri Listele</h3>
+        <button onclick="listModules()">Modülleri Getir</button>
+        <div id="modules-list"></div>
+    </div>
+    
+    <div class="debug-box">
+        <h3>2. Belirli Modül Detayını Getir</h3>
+        <input type="number" id="module-id-input" placeholder="Module ID" value="1">
+        <button onclick="getModuleDetails()">Modül Detayını Getir</button>
+        <div id="module-details"></div>
+    </div>
+    
+    <div class="debug-box">
+        <h3>3. Admin Panel Simülasyonu</h3>
+        <p>Admin panel ne URL kullanıyor modül edit için?</p>
+        <input type="text" id="edit-url" placeholder="/platform/pages/module-builder.php?id=123" style="width: 400px;">
+        <button onclick="testEditUrl()">URL Test Et</button>
+        <div id="url-test-result"></div>
+    </div>
+    
+    <div class="debug-box">
+        <h3>4. Module Builder AJAX Test</h3>
+        <button onclick="testAllActions()">Tüm Action'ları Test Et</button>
+        <div id="ajax-tests"></div>
+    </div>
+    
+    <div class="debug-box">
+        <h3>5. Console Log</h3>
+        <button onclick="clearConsole()">Temizle</button>
+        <div class="console-log" id="console-log">
+            🔍 Module Edit Debug başlatıldı...<br>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const console_div = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = { success: '#00ff00', error: '#ff0000', warning: '#ffff00', info: '#00ffff' };
+            const color = colors[type] || '#ffffff';
+            
+            console_div.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span><br>`;
+            console_div.scrollTop = console_div.scrollHeight;
+            
+            // Browser console'a da yaz
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearConsole() {
+            document.getElementById('console-log').innerHTML = '🧹 Console temizlendi...<br>';
+        }
+
+        async function makeRequest(action, data = {}) {
+            log(`📡 Request: ${action}`, 'info');
+            
+            try {
+                const response = await fetch('../platform/ajax/module-builder.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ...data })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ ${action} başarılı`, 'success');
+                    return { success: true, data: result };
+                } else {
+                    log(`❌ ${action} hatası: ${result.error || 'Unknown error'}`, 'error');
+                    return { success: false, error: result.error };
+                }
+            } catch (error) {
+                log(`💥 ${action} exception: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function listModules() {
+            log('📋 Modülleri listeleniyor...', 'info');
+            
+            const result = await makeRequest('get_modules');
+            const listDiv = document.getElementById('modules-list');
+            
+            if (result.success && result.data.modules) {
+                const modules = result.data.modules;
+                log(`📊 ${modules.length} modül bulundu`, 'success');
+                
+                let html = '<table border="1" style="width: 100%; margin-top: 10px;"><tr><th>ID</th><th>Name</th><th>Module Name</th><th>Category</th><th>Components</th><th>Actions</th></tr>';
+                
+                modules.forEach(module => {
+                    html += `<tr>
+                        <td>${module.id}</td>
+                        <td>${module.name || 'NULL'}</td>
+                        <td>${module.module_name || 'NULL'}</td>
+                        <td>${module.category}</td>
+                        <td>${module.component_count}</td>
+                        <td><button onclick="getModuleDetails(${module.id})">Details</button></td>
+                    </tr>`;
+                });
+                
+                html += '</table>';
+                listDiv.innerHTML = html;
+            } else {
+                listDiv.innerHTML = '<div class="error">❌ Modüller getirilemedi: ' + (result.error || 'Unknown error') + '</div>';
+            }
+        }
+
+        async function getModuleDetails(moduleId = null) {
+            if (!moduleId) {
+                moduleId = document.getElementById('module-id-input').value;
+            }
+            
+            if (!moduleId) {
+                log('❌ Module ID gerekli', 'error');
+                return;
+            }
+            
+            log(`📖 Module ${moduleId} detayı getiriliyor...`, 'info');
+            
+            const result = await makeRequest('get_module_details', { module_id: moduleId });
+            const detailsDiv = document.getElementById('module-details');
+            
+            if (result.success) {
+                // ===== RESPONSE STRUCTURE DEBUG =====
+                log('🔍 Full response structure:');
+                console.log('Full result:', result);
+                console.log('result.data:', result.data);
+                
+                // Response yapısını kontrol et
+                let module, components, workflows;
+                
+                if (result.data.module) {
+                    // Beklenen yapı
+                    module = result.data.module;
+                    components = result.data.components || [];
+                    workflows = result.data.workflows || [];
+                    log('✅ Standard response structure', 'success');
+                } else if (result.data.name) {
+                    // Module direkt result.data içinde
+                    module = result.data;
+                    components = result.data.components || [];
+                    workflows = result.data.workflows || [];
+                    log('✅ Flat response structure', 'success');
+                } else {
+                    // Başka bir yapı
+                    log('❌ Unexpected response structure', 'error');
+                    log('Available keys: ' + Object.keys(result.data).join(', '));
+                    
+                    detailsDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Unexpected response structure!<br>
+                        <strong>Available keys:</strong> ${Object.keys(result.data).join(', ')}<br>
+                        <strong>Raw response:</strong>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>`;
+                    return;
+                }
+                
+                log(`✅ Module detayı alındı: ${module.name || module.module_name || 'NO_NAME'}`, 'success');
+                
+                let html = `
+                <div class="success">
+                    <h4>🔍 Response Debug Info:</h4>
+                    <p><strong>Response Type:</strong> ${result.data.module ? 'Nested' : 'Flat'}</p>
+                    <p><strong>Available Fields:</strong> ${Object.keys(module).join(', ')}</p>
+                    
+                    <h4>📋 Module Bilgisi:</h4>
+                    <p><strong>ID:</strong> ${module.id || 'N/A'}</p>
+                    <p><strong>Name:</strong> ${module.name || 'NULL'}</p>
+                    <p><strong>Module Name:</strong> ${module.module_name || 'NULL'}</p>
+                    <p><strong>Module Code:</strong> ${module.module_code || 'NULL'}</p>
+                    <p><strong>Description:</strong> ${module.description || 'NULL'}</p>
+                    <p><strong>Category:</strong> ${module.category || 'NULL'}</p>
+                    <p><strong>Status:</strong> ${module.status || 'NULL'}</p>
+                    <p><strong>Created:</strong> ${module.created_at || 'NULL'}</p>
+                    
+                    <h4>🧩 Components (${components.length}):</h4>
+                `;
+                
+                if (components.length > 0) {
+                    html += '<ul>';
+                    components.forEach(comp => {
+                        html += `<li>
+                            <strong>${comp.component_name || 'NO_NAME'}</strong> 
+                            (${comp.component_type || 'NO_TYPE'}) 
+                            - Position: ${comp.position_x || 0}, ${comp.position_y || 0}
+                            - Size: ${comp.width || 0}x${comp.height || 0}
+                        </li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += '<p style="color: orange;">⚠️ Hiç component yok!</p>';
+                }
+                
+                html += `
+                    <h4>⚙️ Workflows (${workflows.length}):</h4>
+                `;
+                
+                if (workflows.length > 0) {
+                    html += '<ul>';
+                    workflows.forEach(workflow => {
+                        html += `<li><strong>${workflow.workflow_name || 'NO_NAME'}</strong> (${workflow.status || 'NO_STATUS'})</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += '<p style="color: orange;">⚠️ Hiç workflow yok!</p>';
+                }
+                
+                // Raw data section
+                html += `
+                    <h4>🔧 Raw Data (Admin Panel için):</h4>
+                    <p><strong>Admin Panel'in kullanması gereken veriler:</strong></p>
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                        document.getElementById('module_name').value = '${module.name || module.module_name || ''}';<br>
+                        document.getElementById('description').value = '${module.description || ''}';<br>
+                        document.getElementById('category').value = '${module.category || ''}';<br>
+                        // Components: ${components.length} adet var, canvas'a çizilmesi gerekiyor
+                    </div>
+                `;
+                
+                html += '</div>';
+                detailsDiv.innerHTML = html;
+                
+                // Console'a detaylı log
+                log('📋 Module object keys: ' + Object.keys(module).join(', '), 'info');
+                log('📋 Components count: ' + components.length, 'info');
+                if (components.length > 0) {
+                    log('📋 First component: ' + JSON.stringify(components[0]), 'info');
+                }
+                
+            } else {
+                detailsDiv.innerHTML = '<div class="error">❌ Module detayı alınamadı: ' + (result.error || 'Unknown error') + '</div>';
+            }
+        }
+
+        async function testAdminPanelCompatibility() {
+            log('🎭 Admin Panel uyumluluğu test ediliyor...', 'info');
+            
+            // Test modülü al
+            const result = await makeRequest('get_module_details', { module_id: 1 });
+            
+            if (result.success) {
+                const data = result.data;
+                
+                log('🎭 Admin Panel için gerekli kontroller:', 'info');
+                
+                // Name field kontrolü
+                const name = data.module?.name || data.module?.module_name || data.name || data.module_name;
+                log(`📝 Name field: ${name ? '✅ VAR' : '❌ YOK'} - "${name}"`, name ? 'success' : 'error');
+                
+                // Description field kontrolü  
+                const description = data.module?.description || data.description;
+                log(`📝 Description field: ${description ? '✅ VAR' : '❌ YOK'} - "${description}"`, description ? 'success' : 'error');
+                
+                // Components kontrolü
+                const components = data.components || data.module?.components || [];
+                log(`🧩 Components: ${components.length > 0 ? '✅ VAR' : '❌ YOK'} - ${components.length} adet`, components.length > 0 ? 'success' : 'error');
+                
+                // Canvas data kontrolü
+                if (components.length > 0) {
+                    const hasPosition = components[0].position_x !== undefined;
+                    const hasSize = components[0].width !== undefined;
+                    log(`🎨 Canvas data: Position ${hasPosition ? '✅' : '❌'}, Size ${hasSize ? '✅' : '❌'}`, hasPosition && hasSize ? 'success' : 'error');
+                }
+                
+                return {
+                    hasName: !!name,
+                    hasDescription: !!description,
+                    hasComponents: components.length > 0,
+                    componentCount: components.length
+                };
+            }
+            
+            return null;
+        }
+        async function testEditUrl() {
+            const url = document.getElementById('edit-url').value;
+            const resultDiv = document.getElementById('url-test-result');
+            
+            log(`🔗 Edit URL test ediliyor: ${url}`, 'info');
+            
+            if (!url) {
+                resultDiv.innerHTML = '<div class="error">❌ URL girin!</div>';
+                return;
+            }
+            
+            // URL'den module ID'yi çıkar
+            const match = url.match(/id=(\d+)/);
+            if (match) {
+                const moduleId = match[1];
+                log(`📖 URL'den Module ID çıkarıldı: ${moduleId}`, 'success');
+                
+                // Bu ID ile detayları getir
+                await getModuleDetails(moduleId);
+                resultDiv.innerHTML = `<div class="success">✅ Module ID ${moduleId} için detaylar yukarıda gösterildi</div>`;
+            } else {
+                resultDiv.innerHTML = '<div class="error">❌ URL\'de module ID bulunamadı (id=123 formatında olmalı)</div>';
+            }
+        }
+
+        async function testAllActions() {
+            const testsDiv = document.getElementById('ajax-tests');
+            testsDiv.innerHTML = '<p>🔄 Tüm action\'lar test ediliyor...</p>';
+            
+            const actions = [
+                { action: 'test_connection' },
+                { action: 'get_modules' },
+                { action: 'debug' },
+                { action: 'get_module_details', module_id: 1 }
+            ];
+            
+            let results = '<h4>AJAX Test Sonuçları:</h4><ul>';
+            
+            for (const test of actions) {
+                const result = await makeRequest(test.action, test);
+                const status = result.success ? '✅' : '❌';
+                results += `<li>${status} ${test.action}: ${result.success ? 'Başarılı' : result.error}</li>`;
+            }
+            
+            results += '</ul>';
+            testsDiv.innerHTML = results;
+        }
+
+        // Admin panel JavaScript'ini simüle et
+        function simulateAdminPanelEdit(moduleId) {
+            log(`🎭 Admin panel edit simülasyonu: Module ${moduleId}`, 'info');
+            
+            // Admin panel muhtemelen böyle bir şey yapıyor:
+            fetch('../platform/ajax/module-builder.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_module_details',
+                    module_id: moduleId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                log('🎭 Admin panel response: ' + JSON.stringify(data), 'info');
+                
+                if (data.success) {
+                    // Admin panel muhtemelen form field'larını doldurur:
+                    log(`🎭 Form doldurulacak veriler:`, 'info');
+                    log(`- Name: ${data.module.name}`, 'info');
+                    log(`- Description: ${data.module.description}`, 'info');
+                    log(`- Components: ${data.components.length} adet`, 'info');
+                } else {
+                    log(`🎭 Admin panel data alırken hata: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                log(`🎭 Admin panel exception: ${error.message}`, 'error');
+            });
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', function() {
+            log('🚀 Module Edit Debug yüklendi', 'success');
+            
+            // 2 saniye sonra otomatik test
+            setTimeout(() => {
+                log('🔄 Otomatik testler başlıyor...', 'info');
+                listModules();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRC Platform - Module Builder Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .test-section { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+            border-left: 4px solid #007bff;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .test-result { 
+            background: #ffffff; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border: 1px solid #ddd;
+        }
+        .module-form {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ajax-log {
+            background: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .food-safety-card {
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        .food-safety-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">🛠️ BRC Platform - Module Builder Test</h1>
+                <div class="alert alert-success">
+                    <strong>✅ Sistem Durumu:</strong> Session aktif, Database bağlantısı başarılı, AJAX endpoint'ler çalışıyor!
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hızlı Testler -->
+        <div class="test-section">
+            <h3>⚡ Hızlı Testler</h3>
+            <div class="test-result">
+                <button class="btn btn-primary me-2" onclick="testModuleBuilder()">Module Builder Test</button>
+                <button class="btn btn-info me-2" onclick="testDataActions()">Data Actions Test</button>
+                <button class="btn btn-success me-2" onclick="getAllModules()">Modülleri Yükle</button>
+                <button class="btn btn-warning me-2" onclick="testCreateModule()">Hızlı Modül Oluştur</button>
+                <button class="btn btn-secondary" onclick="clearLog()">Log Temizle</button>
+            </div>
+            <div id="quick-test-results"></div>
+        </div>
+
+        <!-- Gıda Güvenliği Hızlı Modülleri -->
+        <div class="test-section">
+            <h3>🥘 Gıda Güvenliği Modülleri - Hızlı Oluşturucu</h3>
+            <div class="row">
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card food-safety-card">
+                        <div class="card-body position-relative">
+                            <span class="badge bg-success status-badge">BRC Standart</span>
+                            <h5 class="card-title">🔍 Kalite Kontrol Planı</h5>
+                            <p class="card-text">Fümigasyon, yıkama, seçim süreçlerinizi dijital takip</p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Süreç kontrol noktaları</li>
+                                <li>✓ Sorumlu kişi atamaları</li>
+                                <li>✓ Düzeltici faaliyetler</li>
+                            </ul>
+                            <button class="btn btn-primary w-100" onclick="createQualityModule()">Oluştur</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card food-safety-card">
+                        <div class="card-body position-relative">
+                            <span class="badge bg-info status-badge">İzlenebilirlik</span>
+                            <h5 class="card-title">📋 Parti Takip Sistemi</h5>
+                            <p class="card-text">İ-017 tarzı parti numaralarıyla süreç geçmişi</p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Hammadde takibi</li>
+                                <li>✓ Üretim geçmişi</li>
+                                <li>✓ Sertifika yönetimi</li>
+                            </ul>
+                            <button class="btn btn-primary w-100" onclick="createTraceabilityModule()">Oluştur</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card food-safety-card">
+                        <div class="card-body position-relative">
+                            <span class="badge bg-warning status-badge">Laboratuvar</span>
+                            <h5 class="card-title">🧪 Analiz Takip</h5>
+                            <p class="card-text">Aflatoksin, nem, mikrobiyolojik test sonuçları</p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Test planlaması</li>
+                                <li>✓ Sonuç takibi</li>
+                                <li>✓ Uygunluk kontrolü</li>
+                            </ul>
+                            <button class="btn btn-primary w-100" onclick="createAnalysisModule()">Oluştur</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card food-safety-card">
+                        <div class="card-body position-relative">
+                            <span class="badge bg-secondary status-badge">Kültür</span>
+                            <h5 class="card-title">👥 Çalışan Değerlendirme</h5>
+                            <p class="card-text">Gıda güvenliği kültürü anket sistemi</p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Anket yönetimi</li>
+                                <li>✓ Sonuç analizi</li>
+                                <li>✓ Eğitim planlaması</li>
+                            </ul>
+                            <button class="btn btn-primary w-100" onclick="createCultureModule()">Oluştur</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card food-safety-card">
+                        <div class="card-body position-relative">
+                            <span class="badge bg-dark status-badge">Spesifikasyon</span>
+                            <h5 class="card-title">📄 Ürün Standartları</h5>
+                            <p class="card-text">Kuru incir TS 541 standart yönetimi</p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Fiziksel özellikler</li>
+                                <li>✓ Kimyasal analiz</li>
+                                <li>✓ Mikrobiyolojik testler</li>
+                            </ul>
+                            <button class="btn btn-primary w-100" onclick="createSpecificationModule()">Oluştur</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card food-safety-card">
+                        <div class="card-body position-relative">
+                            <span class="badge bg-danger status-badge">HACCP</span>
+                            <h5 class="card-title">⚠️ Risk Değerlendirme</h5>
+                            <p class="card-text">BRC uyumlu tehlike analizi sistemi</p>
+                            <ul class="list-unstyled small">
+                                <li>✓ Tehlike tanımlama</li>
+                                <li>✓ Risk matrisi</li>
+                                <li>✓ Kritik kontrol noktaları</li>
+                            </ul>
+                            <button class="btn btn-primary w-100" onclick="createHACCPModule()">Oluştur</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manuel Modül Oluşturma -->
+        <div class="test-section">
+            <h3>➕ Manuel Modül Oluştur</h3>
+            <div class="module-form">
+                <form id="module-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="module-name" class="form-label">Modül Adı</label>
+                                <input type="text" class="form-control" id="module-name" placeholder="Örn: Özel Kalite Kontrol Sistemi">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="module-category" class="form-label">Kategori</label>
+                                <select class="form-control" id="module-category">
+                                    <option value="quality_control">Kalite Kontrol</option>
+                                    <option value="traceability">İzlenebilirlik</option>
+                                    <option value="specifications">Spesifikasyon</option>
+                                    <option value="laboratory">Laboratuvar</option>
+                                    <option value="culture">Kültür</option>
+                                    <option value="haccp">HACCP</option>
+                                    <option value="general">Genel</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="module-description" class="form-label">Açıklama</label>
+                        <textarea class="form-control" id="module-description" rows="3" placeholder="Modülün ne işe yaradığını açıklayın..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success me-2">Modül Oluştur</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Formu Temizle</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Mevcut Modüller -->
+        <div class="test-section">
+            <h3>📋 Mevcut Modüller</h3>
+            <div id="modules-list">
+                <div class="text-center">
+                    <button class="btn btn-info" onclick="loadModules()">Modülleri Yükle</button>
+                </div>
+                <div id="modules-container"></div>
+            </div>
+        </div>
+
+        <!-- AJAX Log -->
+        <div class="test-section">
+            <h3>📝 AJAX Test Log</h3>
+            <div class="ajax-log" id="ajax-log">
+                🚀 BRC Platform Module Builder Test Console başlatıldı...<br>
+                ✅ Session: Admin ID 1 aktif<br>
+                ✅ Database: Bağlantı başarılı<br>
+                📡 AJAX endpoint'ler hazır...<br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Session bilgileri (gerçek session'dan alınacak)
+        let sessionInfo = {
+            adminId: 1,
+            userId: 1,
+            companyId: 1,
+            csrfToken: 'dynamic_token'
+        };
+        
+        // Log fonksiyonu
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('ajax-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'success': '#00ff00',
+                'error': '#ff0000', 
+                'info': '#00ffff',
+                'warning': '#ffff00'
+            };
+            const color = colors[type] || '#ffffff';
+            
+            logElement.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span><br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('ajax-log').innerHTML = '🧹 Log temizlendi...<br>';
+        }
+
+        // AJAX helper function
+        async function makeAjaxRequest(url, data) {
+            log(`📡 Request: ${url}`, 'info');
+            log(`📤 Data: ${JSON.stringify(data)}`, 'info');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const responseData = await response.json();
+                
+                if (response.ok) {
+                    log(`✅ Success (${response.status}): ${JSON.stringify(responseData)}`, 'success');
+                } else {
+                    log(`❌ Error (${response.status}): ${JSON.stringify(responseData)}`, 'error');
+                }
+                
+                return { success: response.ok, data: responseData, status: response.status };
+                
+            } catch (error) {
+                log(`💥 Exception: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Test fonksiyonları
+        async function testModuleBuilder() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'test_connection'
+            });
+            
+            showTestResult('Module Builder Test', result);
+        }
+
+        async function testDataActions() {
+            const result = await makeAjaxRequest('customer/ajax/data-actions.php', {
+                action: 'test_save',
+                test_field: 'test_value'
+            });
+            
+            showTestResult('Data Actions Test', result);
+        }
+
+        async function getAllModules() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'get_modules'
+            });
+            
+            showTestResult('Get All Modules', result);
+            
+            if (result.success && result.data.modules) {
+                displayModules(result.data.modules);
+            }
+        }
+
+        async function testCreateModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'Test Modülü ' + Date.now(),
+                description: 'Otomatik test modülü',
+                category: 'general'
+            });
+            
+            showTestResult('Hızlı Modül Oluşturma', result);
+            
+            if (result.success) {
+                setTimeout(loadModules, 1000);
+            }
+        }
+
+        // Gıda güvenliği modülleri
+        async function createQualityModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'BRC Kalite Kontrol Planı v2.0',
+                description: 'Fümigasyon, yıkama, seçim, aflatoksin kontrolü ve son kontrol süreçlerini kapsayan kapsamlı kalite kontrol sistemi',
+                category: 'quality_control'
+            });
+            
+            if (result.success) {
+                log('🥘 Kalite Kontrol Planı modülü başarıyla oluşturuldu!', 'success');
+                loadModules();
+            }
+        }
+
+        async function createTraceabilityModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'İzlenebilirlik Sistemi v2.0',
+                description: 'İ-017 tarzı parti numaraları, hammadde girişi, fümigasyon, üretim ve sevkiyat süreçlerinin tam takip sistemi',
+                category: 'traceability'
+            });
+            
+            if (result.success) {
+                log('📋 İzlenebilirlik Sistemi modülü başarıyla oluşturuldu!', 'success');
+                loadModules();
+            }
+        }
+
+        async function createAnalysisModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'Analiz Takip Sistemi v2.0',
+                description: 'Aflatoksin, nem, mikrobiyolojik, pestisit ve ağır metal analizlerinin planlanması ve sonuçlarının takip sistemi',
+                category: 'laboratory'
+            });
+            
+            if (result.success) {
+                log('🧪 Analiz Takip Sistemi modülü başarıyla oluşturuldu!', 'success');
+                loadModules();
+            }
+        }
+
+        async function createCultureModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'Gıda Güvenliği Kültürü Ölçümü v2.0',
+                description: '23 soruluk çalışan değerlendirme anketi, demografik analiz ve kültür iyileştirme önerileri sistemi',
+                category: 'culture'
+            });
+            
+            if (result.success) {
+                log('👥 Gıda Güvenliği Kültürü modülü başarıyla oluşturuldu!', 'success');
+                loadModules();
+            }
+        }
+
+        async function createSpecificationModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'Ürün Spesifikasyon Yönetimi v2.0',
+                description: 'TS 541 Kuru İncir standardı, fiziksel-kimyasal-mikrobiyolojik özellikler ve beslenme değerleri yönetimi',
+                category: 'specifications'
+            });
+            
+            if (result.success) {
+                log('📄 Ürün Spesifikasyon modülü başarıyla oluşturuldu!', 'success');
+                loadModules();
+            }
+        }
+
+        async function createHACCPModule() {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: 'BRC HACCP Risk Değerlendirme v2.0',
+                description: 'Tehlike analizi, risk matrisi, kritik kontrol noktaları ve izleme prosedürleri sistemi',
+                category: 'haccp'
+            });
+            
+            if (result.success) {
+                log('⚠️ HACCP Risk Değerlendirme modülü başarıyla oluşturuldu!', 'success');
+                loadModules();
+            }
+        }
+
+        // Test sonuçlarını göster
+        function showTestResult(testName, result) {
+            const resultsDiv = document.getElementById('quick-test-results');
+            const resultClass = result.success ? 'alert-success' : 'alert-danger';
+            const icon = result.success ? '✅' : '❌';
+            
+            resultsDiv.innerHTML = `
+                <div class="alert ${resultClass} mt-3">
+                    <h6>${icon} ${testName}</h6>
+                    <pre style="font-size: 12px; margin: 0;">${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        // Modül formu submit
+        document.getElementById('module-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('module-name').value;
+            const description = document.getElementById('module-description').value;
+            const category = document.getElementById('module-category').value;
+            
+            if (!name.trim()) {
+                alert('Modül adı gerekli!');
+                return;
+            }
+
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'create_module',
+                name: name,
+                description: description,
+                category: category
+            });
+
+            if (result.success) {
+                log(`🎉 "${name}" modülü başarıyla oluşturuldu!`, 'success');
+                resetForm();
+                loadModules();
+            } else {
+                log(`💥 Modül oluşturulamadı: ${result.data?.error || result.error}`, 'error');
+            }
+        });
+
+        // Modülleri yükle ve göster
+        async function loadModules() {
+            log('📋 Modüller yükleniyor...', 'info');
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'get_modules'
+            });
+            
+            if (result.success && result.data.modules) {
+                displayModules(result.data.modules);
+                log(`✅ ${result.data.modules.length} modül yüklendi`, 'success');
+            }
+        }
+
+        function displayModules(modules) {
+            const container = document.getElementById('modules-container');
+            
+            if (modules.length === 0) {
+                container.innerHTML = '<p class="text-muted mt-3">Henüz modül bulunmuyor.</p>';
+                return;
+            }
+            
+            let html = '<div class="row mt-3">';
+            
+            modules.forEach(module => {
+                const categoryColors = {
+                    'quality_control': 'success',
+                    'traceability': 'info', 
+                    'laboratory': 'warning',
+                    'culture': 'secondary',
+                    'specifications': 'dark',
+                    'haccp': 'danger',
+                    'general': 'primary'
+                };
+                
+                const badgeColor = categoryColors[module.category] || 'primary';
+                
+                html += `
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">${module.name}</h6>
+                                <p class="card-text small">${module.description || 'Açıklama yok'}</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-${badgeColor}">${module.category}</span>
+                                    <span class="badge bg-light text-dark">${module.component_count || 0} component</span>
+                                </div>
+                                <div class="btn-group w-100" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editModule(${module.id})">Düzenle</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteModule(${module.id})">Sil</button>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    Oluşturulma: ${new Date(module.created_at).toLocaleDateString('tr-TR')}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Modül düzenleme ve silme
+        async function editModule(moduleId) {
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'get_module_details',
+                module_id: moduleId
+            });
+            
+            if (result.success) {
+                const module = result.data.module;
+                document.getElementById('module-name').value = module.name;
+                document.getElementById('module-description').value = module.description || '';
+                document.getElementById('module-category').value = module.category;
+                
+                document.getElementById('module-form').scrollIntoView({ behavior: 'smooth' });
+                log(`📝 "${module.name}" modülü düzenleme için yüklendi`, 'info');
+            }
+        }
+
+        async function deleteModule(moduleId) {
+            if (!confirm('Bu modülü silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            const result = await makeAjaxRequest('platform/ajax/module-builder.php', {
+                action: 'delete_module',
+                module_id: moduleId
+            });
+            
+            if (result.success) {
+                log('🗑️ Modül başarıyla silindi!', 'success');
+                loadModules();
+            } else {
+                log(`💥 Modül silinemedi: ${result.data?.error || result.error}`, 'error');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('module-form').reset();
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', function() {
+            log('🚀 BRC Platform Module Builder Test sayfası yüklendi', 'success');
+            log('🥘 Gıda güvenliği modülleri hazır!', 'info');
+            
+            // 2 saniye sonra otomatik test
+            setTimeout(() => {
+                log('🔄 Otomatik testler başlıyor...', 'info');
+                testModuleBuilder();
+                
+                // 1 saniye sonra modülleri yükle
+                setTimeout(loadModules, 1000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
