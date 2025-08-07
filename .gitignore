@@ -1,0 +1,19 @@
+# Log files
+logs/
+*.log
+
+# Config files with credentials  
+config/config.php
+dbConnect/dbkonfigur.php
+
+# Cache and temp
+cache/
+tmp/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
