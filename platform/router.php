@@ -31,8 +31,11 @@ if (strpos($requestUri, '?') !== false) {
     $requestUri = substr($requestUri, 0, strpos($requestUri, '?'));
 }
 
+// Query string parametrelerini al
+$page = $_GET['page'] ?? '';
+
 // Debug için
-error_log("Platform Router - URI: " . $requestUri);
+error_log("Platform Router - URI: " . $requestUri . " | Page: " . $page);
 
 // Layout helper function
 function renderAdminPage($pagePath, $pageTitle = 'Admin Panel') {
@@ -43,7 +46,59 @@ function renderAdminPage($pagePath, $pageTitle = 'Admin Panel') {
     return ob_get_clean();
 }
 
-// Routing logic
+// Query string bazlı routing (priority)
+if (!empty($page)) {
+    switch ($page) {
+        case 'dashboard':
+            requireAdminAuth();
+            include __DIR__ . '/pages/dashboard.php';
+            exit;
+            
+        case 'companies':
+            requireAdminAuth();
+            include __DIR__ . '/pages/companies.php';
+            exit;
+            
+        case 'module-builder':
+            requireAdminAuth();
+            include __DIR__ . '/pages/module-builder.php';
+            exit;
+            
+        case 'module-builder-enhanced':
+            requireAdminAuth();
+            include __DIR__ . '/pages/module-builder-enhanced.php';
+            exit;
+            
+        case 'component-library':
+            requireAdminAuth();
+            include __DIR__ . '/pages/component-library.php';
+            exit;
+            
+        case 'component-marketplace':
+            requireAdminAuth();
+            include __DIR__ . '/pages/component-marketplace.php';
+            exit;
+            
+        case 'modules':
+            requireAdminAuth();
+            include __DIR__ . '/pages/modules.php';
+            exit;
+            
+        case 'login':
+            include __DIR__ . '/auth/login.php';
+            exit;
+            
+        case 'logout':
+            include __DIR__ . '/auth/logout.php';
+            exit;
+            
+        default:
+            // Query string'de bilinmeyen sayfa
+            break;
+    }
+}
+
+// URI bazlı routing (fallback)
 switch (true) {
     // Admin ana sayfası
     case $requestUri === '/admin' || $requestUri === '/platform':
@@ -87,6 +142,18 @@ switch (true) {
         include __DIR__ . '/pages/module-builder.php';
         break;
         
+    // Enhanced Module builder
+    case $requestUri === '/admin/module-builder-enhanced' || $requestUri === '/platform/pages/module-builder-enhanced':
+        requireAdminAuth();
+        include __DIR__ . '/pages/module-builder-enhanced.php';
+        break;
+        
+    // Component Library
+    case $requestUri === '/admin/component-library' || $requestUri === '/platform/pages/component-library':
+        requireAdminAuth();
+        include __DIR__ . '/pages/component-library.php';
+        break;
+        
     // Modules
     case $requestUri === '/admin/modules' || $requestUri === '/platform/pages/modules':
         requireAdminAuth();
@@ -125,6 +192,7 @@ switch (true) {
                 <h1>404 - Sayfa Bulunamadı</h1>
                 <p>Aradığınız sayfa mevcut değil.</p>
                 <p>URI: ' . htmlspecialchars($requestUri) . '</p>
+                <p>Page Param: ' . htmlspecialchars($page) . '</p>
                 <a href="' . $basePath . '/admin" class="btn">Admin Paneline Dön</a>
                 <a href="' . $basePath . '/website/home" class="btn">Ana Sayfaya Dön</a>
             </div>
