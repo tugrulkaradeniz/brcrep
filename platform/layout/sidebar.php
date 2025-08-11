@@ -62,6 +62,15 @@ $current_page = basename($_SERVER['REQUEST_URI']);
                     <span class="badge badge-warning">Pro</span>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link <?= (strpos($current_page, 'module-configurator') !== false) ? 'active' : '' ?>" 
+                   href="?page=module-configurator">
+                    <i class="fas fa-magic"></i>
+                    <span>Module Configurator</span>
+                    <span class="badge badge-warning">Pro</span>
+                </a>
+            </li>
             
             <!-- Templates -->
             <li class="nav-item">

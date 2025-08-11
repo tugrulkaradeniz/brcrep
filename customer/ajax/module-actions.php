@@ -1,145 +1,117 @@
 <?php
+// Customer Module Subscription AJAX Handler
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-session_start();
-require_once '../../dbConnect/dbkonfigur.php';
-require_once '../../models/Module.php';
-require_once '../../services/CompanyContext.php';
-
-// Customer authentication check
-if (!isset($_SESSION['company_user_id'])) {
+// Check if user is logged in
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['company_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
+// Get JSON input
+$input = json_decode(file_get_contents('php://input'), true);
+$action = $input['action'] ?? '';
+$moduleId = intval($input['module_id'] ?? 0);
 $companyId = $_SESSION['company_id'];
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
-$moduleModel = new Module($baglanti);
+$userId = $_SESSION['user_id'];
 
-switch ($action) {
-    case 'subscribe':
-        try {
-            $moduleId = $_POST['module_id'];
-            if (empty($moduleId)) {
-                throw new Exception('Module ID is required');
-            }
-            
-            // Check if already subscribed
-            $stmt = $baglanti->prepare("
-                SELECT id FROM company_module_subscriptions 
-                WHERE company_id = ? AND module_id = ? AND status = 'active'
-            ");
-            $stmt->execute([$companyId, $moduleId]);
-            
-            if ($stmt->fetch()) {
-                throw new Exception('Already subscribed to this module');
-            }
-            
-            // Get module details
-            $module = $moduleModel->getById($moduleId);
-            if (!$module) {
-                throw new Exception('Module not found');
-            }
-            
-            // Create subscription
-            $stmt = $baglanti->prepare("
-                INSERT INTO company_module_subscriptions (company_id, module_id, expires_at, status)
-                VALUES (?, ?, DATE_ADD(CURRENT_DATE, INTERVAL 1 MONTH), 'active')
-            ");
-            
-            if ($stmt->execute([$companyId, $moduleId])) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Successfully subscribed to module',
-                    'module_name' => $module['module_name']
-                ]);
-            } else {
-                throw new Exception('Failed to create subscription');
-            }
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-        
-    case 'unsubscribe':
-        try {
-            $moduleId = $_POST['module_id'];
-            if (empty($moduleId)) {
-                throw new Exception('Module ID is required');
-            }
-            
-            $stmt = $baglanti->prepare("
-                UPDATE company_module_subscriptions 
-                SET status = 'cancelled', updated_at = NOW()
-                WHERE company_id = ? AND module_id = ? AND status = 'active'
-            ");
-            
-            if ($stmt->execute([$companyId, $moduleId])) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Successfully unsubscribed from module'
-                ]);
-            } else {
-                throw new Exception('Failed to unsubscribe');
-            }
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-        
-    case 'my_modules':
-        try {
-            $modules = $moduleModel->getByCompany($companyId);
-            echo json_encode([
-                'success' => true,
-                'data' => $modules
-            ]);
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-        
-    case 'marketplace':
-        try {
-            $modules = $moduleModel->getPublished();
-            
-            // Mark which modules are already subscribed
-            foreach ($modules as &$module) {
-                $stmt = $baglanti->prepare("
-                    SELECT id FROM company_module_subscriptions 
-                    WHERE company_id = ? AND module_id = ? AND status = 'active'
-                ");
-                $stmt->execute([$companyId, $module['id']]);
-                $module['is_subscribed'] = $stmt->fetch() !== false;
-            }
-            
-            echo json_encode([
-                'success' => true,
-                'data' => $modules
-            ]);
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
-        }
-        break;
-        
-    default:
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid action'
-        ]);
+if (!$action || !$moduleId) {
+    echo json_encode(['success' => false, 'message' => 'Missing parameters']);
+    exit;
 }
 
+// Database connection
+try {
+    $pdo = new PDO("mysql:host=localhost;dbname=brcload_platform;charset=utf8mb4", "root", "", [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+    ]);
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+    exit;
+}
+
+try {
+    if ($action === 'subscribe') {
+        // Check if already subscribed
+        $checkStmt = $pdo->prepare("
+            SELECT id FROM company_module_subscriptions 
+            WHERE company_id = ? AND module_id = ?
+        ");
+        $checkStmt->execute([$companyId, $moduleId]);
+        
+        if ($checkStmt->fetch()) {
+            echo json_encode(['success' => false, 'message' => 'Already subscribed to this module']);
+            exit;
+        }
+        
+        // Get module info
+        $moduleStmt = $pdo->prepare("SELECT module_name, price FROM marketplace_modules WHERE id = ?");
+        $moduleStmt->execute([$moduleId]);
+        $module = $moduleStmt->fetch();
+        
+        if (!$module) {
+            echo json_encode(['success' => false, 'message' => 'Module not found']);
+            exit;
+        }
+        
+        // Insert subscription
+        $insertStmt = $pdo->prepare("
+            INSERT INTO company_module_subscriptions 
+            (company_id, module_id, subscribed_at, expires_at, status, created_at, updated_at)
+            VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 'active', NOW(), NOW())
+        ");
+        
+        $result = $insertStmt->execute([$companyId, $moduleId]);
+        
+        if ($result) {
+            // Log activity
+            error_log("User {$userId} subscribed company {$companyId} to module {$moduleId}: {$module['module_name']}");
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => "Successfully subscribed to {$module['module_name']}",
+                'module_name' => $module['module_name']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to subscribe']);
+        }
+        
+    } elseif ($action === 'unsubscribe') {
+        // Remove subscription
+        $deleteStmt = $pdo->prepare("
+            DELETE FROM company_module_subscriptions 
+            WHERE company_id = ? AND module_id = ?
+        ");
+        
+        $result = $deleteStmt->execute([$companyId, $moduleId]);
+        
+        if ($result && $deleteStmt->rowCount() > 0) {
+            // Get module name for logging
+            $moduleStmt = $pdo->prepare("SELECT module_name FROM marketplace_modules WHERE id = ?");
+            $moduleStmt->execute([$moduleId]);
+            $module = $moduleStmt->fetch();
+            
+            error_log("User {$userId} unsubscribed company {$companyId} from module {$moduleId}: {$module['module_name']}");
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => "Successfully unsubscribed from {$module['module_name']}",
+                'module_name' => $module['module_name']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Subscription not found or already removed']);
+        }
+        
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Invalid action']);
+    }
+    
+} catch (PDOException $e) {
+    error_log("Database error in module-actions.php: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Database error occurred']);
+}
 ?>

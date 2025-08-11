@@ -117,6 +117,71 @@ switch ($page) {
     case 'modules':
         require_once 'customer/pages/modules.php';
         break;
+
+    case 'module':
+        $moduleCode = $_GET['module_code'] ?? '';
+        if ($moduleCode) {
+            // Check subscription first
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            
+            // Database connection for subscription check
+            try {
+                $pdo = new PDO("mysql:host=localhost;dbname=brcload_platform;charset=utf8mb4", "root", "", [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+                ]);
+                
+                $moduleCheckStmt = $pdo->prepare("
+                    SELECT cms.*, mm.module_name 
+                    FROM company_module_subscriptions cms
+                    JOIN marketplace_modules mm ON cms.module_id = mm.id
+                    WHERE cms.company_id = ? AND mm.module_code = ? AND cms.status = 'active'
+                ");
+                $moduleCheckStmt->execute([$_SESSION['company_id'] ?? 1, $moduleCode]);
+                $subscription = $moduleCheckStmt->fetch();
+                
+                if ($subscription) {
+                    // Check if module file exists
+                    $moduleFile = "modules/{$moduleCode}.php";
+                    if (file_exists($moduleFile)) {
+                        require_once $moduleFile;
+                    } else {
+                        // Module not implemented yet
+                        echo "<div class='container mt-5'>
+                                <div class='alert alert-warning'>
+                                    <h4><i class='fas fa-tools'></i> Module Under Development</h4>
+                                    <p>The <strong>{$subscription['module_name']}</strong> module is currently being developed.</p>
+                                    <p>You are subscribed to this module and will have access as soon as it's ready.</p>
+                                    <a href='?page=marketplace' class='btn btn-primary'>Return to Marketplace</a>
+                                </div>
+                            </div>";
+                    }
+                } else {
+                    // Not subscribed
+                    echo "<div class='container mt-5'>
+                            <div class='alert alert-danger'>
+                                <h4><i class='fas fa-lock'></i> Access Denied</h4>
+                                <p>You need to subscribe to this module to access it.</p>
+                                <a href='?page=marketplace' class='btn btn-primary'>Go to Marketplace</a>
+                            </div>
+                        </div>";
+                }
+            } catch (PDOException $e) {
+                echo "<div class='container mt-5'>
+                        <div class='alert alert-danger'>
+                            <h4>Database Error</h4>
+                            <p>Unable to verify module access.</p>
+                        </div>
+                    </div>";
+            }
+        } else {
+            // No module code provided
+            header('Location: ?page=marketplace');
+            exit;
+        }
+        break;
         
     case 'logout':
         session_destroy();

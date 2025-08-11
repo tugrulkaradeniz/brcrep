@@ -10,3 +10,55 @@
 2025-08-07 09:45:06 - DEBUG: JSON Data - null
 2025-08-07 09:45:06 - DEBUG: Using GET input - []
 2025-08-07 09:45:06 - DEBUG: Action detected - {"action":"get_module_details"}
+2025-08-11 10:37:12 - DEBUG: REQUEST_METHOD - "POST"
+2025-08-11 10:37:12 - DEBUG: POST Data - []
+2025-08-11 10:37:12 - DEBUG: GET Data - []
+2025-08-11 10:37:12 - DEBUG: JSON Data - {"action":"create_module","name":"bir denem daha","description":"deneme denemem","category":"BRC Compliance","version":"1.0.0","price":10}
+2025-08-11 10:37:12 - DEBUG: Using JSON input - []
+2025-08-11 10:37:12 - DEBUG: Action detected - {"action":"create_module"}
+2025-08-11 10:37:12 - DEBUG: Creating module with action: create_module - {"action":"create_module","name":"bir denem daha","description":"deneme denemem","category":"BRC Compliance","version":"1.0.0","price":10}
+2025-08-11 10:37:13 - DEBUG: REQUEST_METHOD - "POST"
+2025-08-11 10:37:13 - DEBUG: POST Data - []
+2025-08-11 10:37:13 - DEBUG: GET Data - []
+2025-08-11 10:37:13 - DEBUG: JSON Data - {"action":"delete_all_components","module_id":"56"}
+2025-08-11 10:37:13 - DEBUG: Using JSON input - []
+2025-08-11 10:37:13 - DEBUG: Action detected - {"action":"delete_all_components"}
+2025-08-11 10:37:13 - DEBUG: REQUEST_METHOD - "POST"
+2025-08-11 10:37:13 - DEBUG: POST Data - []
+2025-08-11 10:37:13 - DEBUG: GET Data - []
+2025-08-11 10:37:13 - DEBUG: JSON Data - {"action":"add_component","module_id":"56","component_name":"Signature Pad","component_type":"signature-pad","component_config":"{}","position_x":133.0333251953125,"position_y":83.86666870117188,"width":250,"height":160}
+2025-08-11 10:37:13 - DEBUG: Using JSON input - []
+2025-08-11 10:37:13 - DEBUG: Action detected - {"action":"add_component"}
+2025-08-11 10:37:13 - DEBUG: add_component called - {"action":"add_component","module_id":"56","component_name":"Signature Pad","component_type":"signature-pad","component_config":"{}","position_x":133.0333251953125,"position_y":83.86666870117188,"width":250,"height":160}
+2025-08-11 10:37:13 - DEBUG: REQUEST_METHOD - "POST"
+2025-08-11 10:37:13 - DEBUG: POST Data - []
+2025-08-11 10:37:13 - DEBUG: GET Data - []
+2025-08-11 10:37:13 - DEBUG: JSON Data - {"action":"add_component","module_id":"56","component_name":"Date Picker","component_type":"date-picker","component_config":"{}","position_x":401.33331298828125,"position_y":35.98333740234375,"width":250,"height":160}
+2025-08-11 10:37:13 - DEBUG: Using JSON input - []
+2025-08-11 10:37:13 - DEBUG: Action detected - {"action":"add_component"}
+2025-08-11 10:37:13 - DEBUG: add_component called - {"action":"add_component","module_id":"56","component_name":"Date Picker","component_type":"date-picker","component_config":"{}","position_x":401.33331298828125,"position_y":35.98333740234375,"width":250,"height":160}
+2025-08-11 10:37:13 - DEBUG: REQUEST_METHOD - "POST"
+2025-08-11 10:37:13 - DEBUG: POST Data - []
+2025-08-11 10:37:13 - DEBUG: GET Data - []
+2025-08-11 10:37:13 - DEBUG: JSON Data - {"action":"add_component","module_id":"56","component_name":"Notification System","component_type":"notification","component_config":"{\"types\":[\"email\",\"sms\",\"in-app\"],\"triggers\":[]}","position_x":280.1333312988281,"position_y":250.88333129882812,"width":250,"height":140}
+2025-08-11 10:37:13 - DEBUG: Using JSON input - []
+2025-08-11 10:37:13 - DEBUG: Action detected - {"action":"add_component"}
+2025-08-11 10:37:13 - DEBUG: add_component called - {"action":"add_component","module_id":"56","component_name":"Notification System","component_type":"notification","component_config":"{\"types\":[\"email\",\"sms\",\"in-app\"],\"triggers\":[]}","position_x":280.1333312988281,"position_y":250.88333129882812,"width":250,"height":140}
+2025-08-11 10:37:26 - DEBUG: REQUEST_METHOD - "GET"
+2025-08-11 10:37:26 - DEBUG: POST Data - []
+2025-08-11 10:37:26 - DEBUG: GET Data - {"action":"get_module_details","module_id":"56"}
+2025-08-11 10:37:26 - DEBUG: JSON Data - null
+2025-08-11 10:37:26 - DEBUG: Using GET input - []
+2025-08-11 10:37:26 - DEBUG: Action detected - {"action":"get_module_details"}
+2025-08-11 10:44:05 - DEBUG: REQUEST_METHOD - "GET"
+2025-08-11 10:44:05 - DEBUG: POST Data - []
+2025-08-11 10:44:05 - DEBUG: GET Data - {"action":"get_module_details","module_id":"56"}
+2025-08-11 10:44:05 - DEBUG: JSON Data - null
+2025-08-11 10:44:05 - DEBUG: Using GET input - []
+2025-08-11 10:44:05 - DEBUG: Action detected - {"action":"get_module_details"}
+2025-08-11 10:44:23 - DEBUG: REQUEST_METHOD - "GET"
+2025-08-11 10:44:23 - DEBUG: POST Data - []
+2025-08-11 10:44:23 - DEBUG: GET Data - {"action":"get_module_details","module_id":"56"}
+2025-08-11 10:44:23 - DEBUG: JSON Data - null
+2025-08-11 10:44:23 - DEBUG: Using GET input - []
+2025-08-11 10:44:23 - DEBUG: Action detected - {"action":"get_module_details"}

@@ -4,25 +4,22 @@
 
 session_start();
 
+// DEBUG: Form POST olup olmadığını kontrol et
+echo "DEBUG: POST data received<br>";
+var_dump($_POST);
+echo "<br>LOGIN: " . ($_POST['login'] ?? 'empty') . "<br>";
+echo "PASSWORD: " . ($_POST['password'] ?? 'empty') . "<br>";
+die(); // Burada dur ve kontrol et
+
 // Include required files
 require_once '../../config/config.php';
 require_once '../../config/functions.php';
 require_once '../../services/TenantContext.php';
 require_once '../../services/CompanyContext.php';
 
+
+
 try {
-    // Initialize tenant context
-    $tenantContext = new TenantContext();
-    $tenant = $tenantContext->detect();
-    
-    if (!$tenant) {
-        // Default to demo company for testing
-        $companyId = 1;
-    } else {
-        CompanyContext::set($tenantContext->getCompanyId());
-        $companyId = $tenantContext->getCompanyId();
-    }
-    
     // Get form data
     $login = $_POST['login'] ?? '';
     $password = $_POST['password'] ?? '';
@@ -32,12 +29,27 @@ try {
         exit;
     }
     
+    // Initialize tenant context
+    $tenantContext = new TenantContext();
+    $tenant = $tenantContext->detect();
+    
+    // Determine company ID and domain
+    if (!$tenant) {
+        // Default to demo company for testing
+        $companyId = 1;
+        $companyDomain = 'demo';
+    } else {
+        CompanyContext::set($tenantContext->getCompanyId());
+        $companyId = $tenantContext->getCompanyId();
+        $companyDomain = $tenant['domain'] ?? 'demo';
+    }
+    
     // Database connection
     require_once '../../dbConnect/dbkonfigur.php';
     
     // Find user in company_users table
     $stmt = $pdo->prepare("
-        SELECT cu.*, c.name as company_name 
+        SELECT cu.*, c.name as company_name, c.domain, c.theme_color 
         FROM company_users cu 
         JOIN companies c ON cu.company_id = c.id 
         WHERE cu.company_id = ? 
@@ -90,20 +102,59 @@ try {
     $_SESSION['last_name'] = $user['last_name'];
     $_SESSION['role'] = $user['role'];
     $_SESSION['company_name'] = $user['company_name'];
+    $_SESSION['company_domain'] = $user['domain'];
+    $_SESSION['theme_color'] = $user['theme_color'];
+    
+    // Log successful login
+    log_event('INFO', 'User login successful', [
+        'user_id' => $user['id'],
+        'username' => $user['username'],
+        'company_id' => $user['company_id'],
+        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+    ]);
+    
+    // Determine redirect URL
+    $dashboardUrl = '';
+    
+    // Try to get company domain from HTTP_REFERER first (most reliable)
+    if (isset($_SERVER['HTTP_REFERER'])) {
+        $referer = $_SERVER['HTTP_REFERER'];
+        // Extract company domain from referer like: http://localhost/brcproject/demo?page=login
+        if (preg_match('/\/brcproject\/([^\/\?]+)/', $referer, $matches)) {
+            $companyDomain = $matches[1];
+        }
+    }
+    
+    // Fallback to user's company domain
+    if (empty($companyDomain) && !empty($user['domain'])) {
+        $companyDomain = $user['domain'];
+    }
+    
+    // Final fallback
+    if (empty($companyDomain)) {
+        $companyDomain = 'demo';
+    }
+    
+    // Construct dashboard URL
+    if (defined('BASE_URL')) {
+        $dashboardUrl = BASE_URL . '/' . $companyDomain . '?page=dashboard';
+    } else {
+        $dashboardUrl = '../../' . $companyDomain . '?page=dashboard';
+    }
     
     // Redirect to dashboard
-    if ($tenant) {
-        // Use tenant-based routing
-        $baseUrl = str_replace('/customer/auth/login-process.php', '', $_SERVER['REQUEST_URI']);
-        header('Location: ' . $baseUrl . '?page=dashboard');
-    } else {
-        // Default dashboard
-        header('Location: ../pages/dashboard.php');
-    }
+    header('Location: ' . $dashboardUrl);
     exit;
     
 } catch (Exception $e) {
-    error_log("Login error: " . $e->getMessage());
+    // Log error
+    log_event('ERROR', 'Login process error', [
+        'error' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'login_attempt' => $_POST['login'] ?? 'unknown'
+    ]);
+    
     header('Location: login.php?error=system_error');
     exit;
 }
